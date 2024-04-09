@@ -1,9 +1,6 @@
 package IvanovVasil.OrderManagmentSystem.Table;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,7 +15,9 @@ import java.util.UUID;
 @Setter
 public class Table {
   @Id
-  @GeneratedValue(strategy = GenerationType.UUID)
+  @GeneratedValue(strategy = GenerationType.AUTO)
   private UUID id;
+  private Long tableNumber;
+  @Enumerated(EnumType.STRING)
   private TableState tableState;
 }

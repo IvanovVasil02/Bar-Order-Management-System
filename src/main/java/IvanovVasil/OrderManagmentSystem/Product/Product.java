@@ -22,5 +22,13 @@ public class Product {
   private UUID id;
   private String name;
   private String description;
+  private Double price;
   private Long quantity;
+
+  public Product(String name, String description, Double price, Long quantity) {
+    this.name = name;
+    this.description = description;
+    this.price = price;
+    this.quantity = quantity;
+  }
 }
