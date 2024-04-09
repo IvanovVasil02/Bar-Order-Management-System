@@ -3,16 +3,18 @@ package IvanovVasil.OrderManagmentSystem.Table;
 import IvanovVasil.OrderManagmentSystem.Product.Product;
 import IvanovVasil.OrderManagmentSystem.exceptions.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
 
+@Service
 public class TablesSerice {
 
   @Autowired
   TablesRepository tr;
 
-  public Table save (Table table){
+  public Table save(Table table) {
     return tr.save(table);
   }
 
@@ -24,12 +26,12 @@ public class TablesSerice {
     return tr.findAll();
   }
 
-  private Table createProduct(String name, String description, Double price, Long quantity){
+  private Table createProduct(String name, String description, Double price, Long quantity) {
     Table table = new Table();
     return tr.save(table);
   }
 
-  private void delete (Table table){
+  private void delete(Table table) {
     tr.deleteById(table.getId());
   }
 }

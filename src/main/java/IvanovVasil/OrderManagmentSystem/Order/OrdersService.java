@@ -8,10 +8,12 @@ import IvanovVasil.OrderManagmentSystem.Table.Table;
 import IvanovVasil.OrderManagmentSystem.Table.TablesSerice;
 import IvanovVasil.OrderManagmentSystem.exceptions.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
 
+@Service
 public class OrdersService {
 
   @Autowired
