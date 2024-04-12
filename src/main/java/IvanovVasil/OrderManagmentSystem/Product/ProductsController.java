@@ -2,6 +2,7 @@ package IvanovVasil.OrderManagmentSystem.Product;
 
 import IvanovVasil.OrderManagmentSystem.Product.payloads.ProductDTO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,11 +26,13 @@ public class ProductsController {
   }
 
   @PostMapping("/addProduct")
-  public void createProduct(ProductDTO body) {
-    ps.createProduct(body.name(), body.description(), body.price(), body.quantity());
+  public Product createProduct(@RequestBody ProductDTO body) {
+    System.out.println(body);
+    Product product = ps.createProduct(body.name(), body.description(), body.price(), body.quantity());
+    return ResponseEntity.ok(product).getBody();
   }
 
-  @PostMapping("/deleteProduct")
+  @DeleteMapping("/deleteProduct")
   public void createProduct(UUID id) {
     ps.delete(id);
   }

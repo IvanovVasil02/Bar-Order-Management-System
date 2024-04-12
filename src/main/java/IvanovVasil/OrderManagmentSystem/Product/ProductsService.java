@@ -26,13 +26,18 @@ public class ProductsService {
     return pr.findAll();
   }
 
-  protected Product createProduct(String name, String description, Double price, Long quantity) {
-    Product product = new Product(name, description, price, quantity);
+  public Product createProduct(String name, String description, Double price, Long quantity) {
+    Product product = Product.builder()
+            .name(name)
+            .description(description)
+            .price(price)
+            .quantity(quantity)
+            .build();
     return pr.save(product);
   }
 
   public List<ProductDTO> getProductByName(String query) {
-    return pr.findByName(query);
+    return pr.findByNameIgnoreCaseContaining(query);
   }
 
   protected void delete(UUID id) {

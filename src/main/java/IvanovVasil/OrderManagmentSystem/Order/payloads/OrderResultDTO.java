@@ -3,13 +3,14 @@ package IvanovVasil.OrderManagmentSystem.Order.payloads;
 import IvanovVasil.OrderManagmentSystem.Order.entities.OrderDetails;
 import lombok.Builder;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
 @Builder
-public record OrderDTO(
-        UUID tableId,
-        String note,
-        List<OrderDetailsDTO> productList) {
+public record OrderResultDTO(
+        UUID order_id,
+        UUID table_id,
+        Long tableNumber,
+        List<OrderDetailsResultDTO> productList,
+        Double totalPrice) {
 }

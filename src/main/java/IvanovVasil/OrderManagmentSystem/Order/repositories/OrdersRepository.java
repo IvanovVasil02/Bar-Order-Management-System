@@ -1,0 +1,14 @@
+package IvanovVasil.OrderManagmentSystem.Order.repositories;
+
+import IvanovVasil.OrderManagmentSystem.Order.entities.Order;
+import IvanovVasil.OrderManagmentSystem.Order.payloads.OrderResultDTO;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.UUID;
+
+@Repository
+public interface OrdersRepository extends JpaRepository<Order, UUID> {
+  List<Order> findByTableId(UUID tableid);
+}

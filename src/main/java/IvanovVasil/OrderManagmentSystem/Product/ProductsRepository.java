@@ -9,5 +9,7 @@ import java.util.UUID;
 
 @Repository
 public interface ProductsRepository extends JpaRepository<Product, UUID> {
-  List<ProductDTO> findByName(String query);
+
+
+  List<ProductDTO> findByNameIgnoreCaseContaining(String query);
 }

@@ -2,9 +2,11 @@ package IvanovVasil.OrderManagmentSystem.Order.payloads;
 
 import lombok.Builder;
 
+import java.util.UUID;
+
 @Builder
 public record OrderDetailsDTO(
-        String id,
+        UUID productId,
         Long quantity,
         String note
 ) {
