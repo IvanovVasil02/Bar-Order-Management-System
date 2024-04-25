@@ -1,6 +1,9 @@
 package IvanovVasil.OrderManagmentSystem.Order.payloads;
 
 import IvanovVasil.OrderManagmentSystem.Order.entities.OrderDetails;
+import IvanovVasil.OrderManagmentSystem.Order.enums.OrderState;
+import IvanovVasil.OrderManagmentSystem.Table.Table;
+import IvanovVasil.OrderManagmentSystem.Table.TableState;
 import lombok.Builder;
 
 import java.util.List;
@@ -12,5 +15,8 @@ public record OrderResultDTO(
         UUID table_id,
         Long tableNumber,
         List<OrderDetailsResultDTO> productList,
-        Double totalPrice) {
+        OrderState orderState,
+        TableState tableState,
+        Double totalPrice,
+        Double remainingToPay) {
 }

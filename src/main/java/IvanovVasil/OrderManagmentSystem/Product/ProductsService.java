@@ -1,5 +1,12 @@
 package IvanovVasil.OrderManagmentSystem.Product;
 
+import IvanovVasil.OrderManagmentSystem.Product.entities.Drink;
+import IvanovVasil.OrderManagmentSystem.Product.entities.HotDishes;
+import IvanovVasil.OrderManagmentSystem.Product.entities.Product;
+import IvanovVasil.OrderManagmentSystem.Product.enums.DrinkCategory;
+import IvanovVasil.OrderManagmentSystem.Product.enums.HotDishesCategory;
+import IvanovVasil.OrderManagmentSystem.Product.enums.ProductCategory;
+import IvanovVasil.OrderManagmentSystem.Product.interfaces.ProductsRepository;
 import IvanovVasil.OrderManagmentSystem.Product.payloads.ProductDTO;
 import IvanovVasil.OrderManagmentSystem.exceptions.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,8 +21,8 @@ public class ProductsService {
   @Autowired
   ProductsRepository pr;
 
-  public void save(Product product) {
-    pr.save(product);
+  public Product save(Product product) {
+    return pr.save(product);
   }
 
   public Product findById(UUID id) {
@@ -26,19 +33,32 @@ public class ProductsService {
     return pr.findAll();
   }
 
-  public Product createProduct(String name, String description, Double price, Long quantity) {
-    Product product = Product.builder()
-            .name(name)
-            .description(description)
-            .price(price)
-            .quantity(quantity)
-            .build();
-    return pr.save(product);
-  }
+  public Product createProduct(ProductDTO body) {
+    Product product = null;
 
-  public List<ProductDTO> getProductByName(String query) {
-    return pr.findByNameIgnoreCaseContaining(query);
+    if (body.productCategory() == ProductCategory.HOT_DISHES) {
+      product = new HotDishes(
+              body.name(),
+              body.price(),
+              (HotDishesCategory) body.productSubcategory(),
+              body.ingredients()
+      );
+
+    } else if (body.productCategory() == ProductCategory.DRINK) {
+      product = new Drink(
+              body.name(),
+              body.price(),
+              (DrinkCategory) body.productSubcategory(),
+              body.quantity()
+      );
+    }
+    if (product != null) {
+      return pr.save(product);
+    } else {
+      throw new IllegalArgumentException("Invalid product category");
+    }
   }
+  
 
   protected void delete(UUID id) {
     pr.deleteById(id);

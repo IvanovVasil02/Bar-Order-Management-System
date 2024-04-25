@@ -1,5 +1,6 @@
 package IvanovVasil.OrderManagmentSystem.Product;
 
+import IvanovVasil.OrderManagmentSystem.Product.entities.Product;
 import IvanovVasil.OrderManagmentSystem.Product.payloads.ProductDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -19,16 +20,12 @@ public class ProductsController {
   public List<Product> getAllProducts() {
     return ps.getAllProducts();
   }
-
-  @GetMapping("/search")
-  public List<ProductDTO> getProductsByName(@RequestParam String query) {
-    return ps.getProductByName(query);
-  }
+  
 
   @PostMapping("/addProduct")
   public Product createProduct(@RequestBody ProductDTO body) {
     System.out.println(body);
-    Product product = ps.createProduct(body.name(), body.description(), body.price(), body.quantity());
+    Product product = ps.createProduct(body);
     return ResponseEntity.ok(product).getBody();
   }
 

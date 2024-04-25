@@ -1,9 +1,5 @@
 package IvanovVasil.OrderManagmentSystem.Order.payloads;
 
-import IvanovVasil.OrderManagmentSystem.Order.entities.Order;
-import IvanovVasil.OrderManagmentSystem.Product.Product;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import lombok.Builder;
 
 import java.time.LocalDateTime;
@@ -15,6 +11,7 @@ public record OrderDetailsResultDTO(
         String productName,
         String productDescription,
         Long quantity,
+        Long preparedQuantity,
         Long paidQuantity,
         double productPrice,
         UUID orderId,

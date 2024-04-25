@@ -1,7 +1,6 @@
 package IvanovVasil.OrderManagmentSystem.Order.entities;
 
-import IvanovVasil.OrderManagmentSystem.Order.enums.OrderDetailState;
-import IvanovVasil.OrderManagmentSystem.Product.Product;
+import IvanovVasil.OrderManagmentSystem.Product.entities.Product;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -25,6 +24,7 @@ public class OrderDetails {
   @JoinColumn(name = "order_id")
   private Order order;
   private Long quantity;
+  private Long preparedQuantity;
   private Long paidQuantity;
   private LocalDateTime localDateTime;
   private double subtotal;

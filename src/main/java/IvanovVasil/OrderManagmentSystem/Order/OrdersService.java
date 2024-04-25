@@ -9,7 +9,7 @@ import IvanovVasil.OrderManagmentSystem.Order.payloads.OrderDetailsResultDTO;
 import IvanovVasil.OrderManagmentSystem.Order.payloads.OrderResultDTO;
 import IvanovVasil.OrderManagmentSystem.Order.repositories.OrderDetailsRepository;
 import IvanovVasil.OrderManagmentSystem.Order.repositories.OrdersRepository;
-import IvanovVasil.OrderManagmentSystem.Product.Product;
+import IvanovVasil.OrderManagmentSystem.Product.entities.Product;
 import IvanovVasil.OrderManagmentSystem.Product.ProductsService;
 import IvanovVasil.OrderManagmentSystem.Table.Table;
 import IvanovVasil.OrderManagmentSystem.Table.TableState;
@@ -84,8 +84,8 @@ public class OrdersService {
         orderDetailsList.add(newOrderDetails);
       }
       order.setProductList(orderDetailsList);
-      order.setTotalAmount(totalAmount);
-      order.setRemainingAmountToPay(totalAmount);
+      updateOrdersTotalAmount(order);
+      updateOrdersRemainingAmount(order);
       Order savedOrder = this.save(order);
       return this.convertOrderResultToDTO(savedOrder);
     } else {
@@ -95,37 +95,72 @@ public class OrdersService {
         OrderDetails oldOrderDetails = odr.findByProductIdAndOrderId(odDTO.productId(), table.getOrder().getId());
 
         oldOrderDetails.setQuantity(oldOrderDetails.getQuantity() + odDTO.quantity());
-        double newSubtotal = this.getOrderDetailsSubtotal(oldOrderDetails);
-        oldOrderDetails.setSubtotal(newSubtotal);
+        updateOrderDetailsSubtotal(oldOrderDetails);
         odr.save(oldOrderDetails);
       }
-      order.setTotalAmount(getOrdersTotalAmount(order));
+      updateOrdersTotalAmount(order);
+      updateOrdersRemainingAmount(order);
       Order savedOrder = this.save(order);
       return this.convertOrderResultToDTO(savedOrder);
 
     }
   }
 
+  public OrderResultDTO payOrder(UUID id) {
+    Order order = or.findById(id).orElseThrow(() -> new NotFoundException(id));
+    Table table = order.getTable();
+    order.setOrderState(OrderState.COMPLETED);
+    order.setRemainingAmountToPay(0.0);
+    for (OrderDetails odts : order.getProductList()) {
+      updateOrderDetailsSubtotal(odts);
+      odr.save(odts);
+    }
+    table.setTableState(TableState.FREE);
+    ts.save(table);
+    or.save(order);
+    return convertOrderResultToDTO(order);
+  }
+
+  public OrderResultDTO payPartialOrder(UUID orderId, List<OrderDetailsDTO> pruductsToPay) {
+    Order order = or.findById(orderId).orElseThrow(() -> new NotFoundException(orderId));
+    Table table = order.getTable();
+    for (OrderDetailsDTO odtDTO : pruductsToPay) {
+      OrderDetails orderDetailsFound = odr.findByProductIdAndOrderId(odtDTO.productId(), orderId);
+      updateOrderDetailsPaiquantity(orderDetailsFound, odtDTO.quantity());
+      odr.save(orderDetailsFound);
+    }
+    updateOrdersTotalAmount(order);
+    updateOrdersRemainingAmount(order);
+    or.save(order);
+    return convertOrderResultToDTO(order);
+  }
+
   private void delete(Order order) {
     or.deleteById(order.getId());
   }
 
-  public Order paidOrder(UUID id) {
-    Order order = or.findById(id).orElseThrow(() -> new NotFoundException(id));
-    Table table = order.getTable();
-    order.setOrderState(ORde);
-
-    table.setTableState(TableState.FREE);
-    return order;
+  public void updateOrdersTotalAmount(Order order) {
+    Double totalAmountToPay = order.getProductList().stream().mapToDouble(e -> e.getQuantity() * e.getProduct().getPrice()).sum();
+    order.setTotalAmount(totalAmountToPay);
   }
 
-  public Double getOrdersTotalAmount(Order order) {
-    return order.getProductList().stream().mapToDouble(OrderDetails::getSubtotal).sum();
+  public void updateOrdersRemainingAmount(Order order) {
+    Double remainingAmountToPay = order.getProductList().stream().mapToDouble(OrderDetails::getSubtotal).sum();
+    order.setRemainingAmountToPay(remainingAmountToPay);
   }
 
-  public double getOrderDetailsSubtotal(OrderDetails orderDetails) {
-    return (orderDetails.getQuantity() * orderDetails.getProduct().getPrice())
+  public void updateOrderDetailsPaiquantity(OrderDetails orderDetails, long quantity) {
+    long paidQuantity = orderDetails.getPaidQuantity() + quantity;
+    if (paidQuantity <= orderDetails.getQuantity()) {
+      orderDetails.setPaidQuantity(paidQuantity);
+      updateOrderDetailsSubtotal(orderDetails);
+    }
+  }
+
+  public void updateOrderDetailsSubtotal(OrderDetails orderDetails) {
+    double updatedSubTotal = (orderDetails.getQuantity() * orderDetails.getProduct().getPrice())
             - (orderDetails.getPaidQuantity() * orderDetails.getProduct().getPrice());
+    orderDetails.setSubtotal(updatedSubTotal);
   }
 
 
@@ -136,7 +171,10 @@ public class OrdersService {
             .table_id(order.getTable().getId())
             .tableNumber(order.getTable().getTableNumber())
             .productList(order.getProductList().stream().map(this::convertOrderDetailsResultDTO).toList())
+            .orderState(order.getOrderState())
+            .remainingToPay(order.getRemainingAmountToPay())
             .totalPrice(order.getTotalAmount())
+            .tableState(order.getTable().getTableState())
             .build();
   }
 
@@ -148,8 +186,8 @@ public class OrdersService {
             .tableNumber(orderDetails.getOrder().getTable().getTableNumber())
             .productId(orderDetails.getProduct().getId())
             .productName(orderDetails.getProduct().getName())
-            .productDescription(orderDetails.getProduct().getDescription())
             .quantity(orderDetails.getQuantity())
+            .preparedQuantity(orderDetails.getPreparedQuantity())
             .paidQuantity(orderDetails.getPaidQuantity())
             .productPrice(orderDetails.getProduct().getPrice())
             .subtotal(orderDetails.getSubtotal())
