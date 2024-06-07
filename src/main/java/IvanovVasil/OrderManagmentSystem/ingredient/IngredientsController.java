@@ -23,18 +23,18 @@ public class IngredientsController {
     return is.getAllIngredientsByCategory();
   }
 
-  @PostMapping("/add")
-  public Ingredient addIngredient(@RequestBody IngredientDTO body) {
+  @PostMapping("")
+  public List<Ingredient> addIngredient(@RequestBody IngredientDTO body) {
     return is.save(body);
   }
 
-  @PutMapping("/edit")
-  public Ingredient editPrdouct(@RequestParam UUID ingredientId, @RequestBody Ingredient body) {
-    return is.editIngredient(ingredientId, String.valueOf(body));
+  @PutMapping("")
+  public List<Ingredient> editIngredient(@RequestParam UUID ingredientId, @RequestBody IngredientDTO body) {
+    return is.editIngredient(ingredientId, body);
   }
 
-  @DeleteMapping("/delete")
-  public void deletePrdouct(@RequestParam UUID ingredientId) {
+  @DeleteMapping("")
+  public void deleteIngredient(@RequestParam UUID ingredientId) {
     is.delete(ingredientId);
   }
 

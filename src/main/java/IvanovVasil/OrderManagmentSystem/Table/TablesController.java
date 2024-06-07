@@ -1,5 +1,6 @@
 package IvanovVasil.OrderManagmentSystem.Table;
 
+import jakarta.websocket.server.PathParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,17 +15,17 @@ public class TablesController {
   TablesSerice ts;
 
   @GetMapping("")
-  public List<Table> getTables() {
+  public List<TableResultDTO> getTables() {
     return ts.getAllTables();
   }
 
-  @PostMapping("/addTable")
-  public Table createTable() {
-    return ts.createTable();
+  @PostMapping("/addTables/{num}")
+  public List<Table> createTables(@PathVariable int num) {
+    return ts.createTables(num);
   }
 
-  @DeleteMapping("")
-  public void deleteTable(@RequestParam UUID id) {
-    ts.deleteTableById(id);
+  @DeleteMapping("/{tableNumber}")
+  public void deleteTable(@PathVariable Long tableNumber) {
+    ts.deleteTableByTableNumber(tableNumber);
   }
 }

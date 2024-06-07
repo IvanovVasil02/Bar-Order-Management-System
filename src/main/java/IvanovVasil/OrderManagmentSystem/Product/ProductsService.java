@@ -33,32 +33,84 @@ public class ProductsService {
     return pr.findAll();
   }
 
-  public Product createProduct(ProductDTO body) {
-    Product product = null;
+  public void createProduct(ProductDTO body) {
+    Product product;
 
-    if (body.productCategory() == ProductCategory.HOT_DISHES) {
+    if (ProductCategory.valueOf(body.productCategory()) == ProductCategory.HOT_DISHES) {
       product = new HotDishes(
-              body.name(),
-              body.price(),
-              (HotDishesCategory) body.productSubcategory(),
-              body.ingredients()
+              body.productName(),
+              Double.parseDouble(String.valueOf(body.price())),
+              HotDishesCategory.valueOf(body.productSubCategory()),
+              body.ingredientList()
       );
-
-    } else if (body.productCategory() == ProductCategory.DRINK) {
+    } else if (ProductCategory.valueOf(body.productCategory()) == ProductCategory.DRINK) {
       product = new Drink(
-              body.name(),
-              body.price(),
-              (DrinkCategory) body.productSubcategory(),
-              body.quantity()
+              body.productName(),
+              Double.parseDouble(String.valueOf(body.price())),
+              DrinkCategory.valueOf(body.productSubCategory()),
+              (long) Integer.parseInt(String.valueOf(body.quantity()))
       );
-    }
-    if (product != null) {
-      return pr.save(product);
     } else {
       throw new IllegalArgumentException("Invalid product category");
     }
+
+    pr.save(product);
   }
-  
+
+  public Product editProduct(UUID productId, ProductDTO body) {
+    Product product = findById(productId);
+    if (product.getProductCategory() == ProductCategory.HOT_DISHES) {
+      HotDishes hotDish = (HotDishes) product;
+
+      if (!body.productCategory().isEmpty()) {
+        hotDish.setProductCategory(ProductCategory.valueOf(body.productCategory()));
+      }
+
+      if (!body.productSubCategory().isEmpty()) {
+        hotDish.setSubCategory(HotDishesCategory.valueOf(body.productCategory()));
+      }
+
+      if (!body.productName().isEmpty()) {
+        hotDish.setName(body.productName());
+      }
+
+      if (!body.price().isNaN()) {
+        hotDish.setPrice(body.price());
+      }
+
+      if (!body.ingredientList().isEmpty()) {
+        hotDish.setIngredients(body.ingredientList());
+      }
+    }
+
+    if (product.getProductCategory() == ProductCategory.DRINK) {
+      Drink drink = (Drink) product;
+
+      if (!body.productCategory().isEmpty()) {
+        drink.setProductCategory(ProductCategory.valueOf(body.productCategory()));
+      }
+
+      if (!body.productSubCategory().isEmpty()) {
+        drink.setSubCategory(DrinkCategory.valueOf(body.productCategory()));
+      }
+
+      if (!body.productName().isEmpty()) {
+        drink.setName(body.productName());
+      }
+
+      if (!body.price().isNaN()) {
+        drink.setPrice(body.price());
+      }
+
+      if (body.quantity() != null) {
+        drink.setQuantity(body.quantity());
+      }
+    }
+
+    return pr.save(product);
+
+  }
+
 
   protected void delete(UUID id) {
     pr.deleteById(id);

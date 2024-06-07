@@ -1,7 +1,5 @@
 package IvanovVasil.OrderManagmentSystem.Product.enums;
 
-import IvanovVasil.OrderManagmentSystem.Product.interfaces.Subcategory;
-
-public enum HotDishesCategory implements Subcategory {
+public enum HotDishesCategory {
   SANDWICH, HAMBURGER, DONER, FRIED
 }

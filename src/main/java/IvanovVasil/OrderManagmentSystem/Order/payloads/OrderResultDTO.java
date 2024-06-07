@@ -6,6 +6,7 @@ import IvanovVasil.OrderManagmentSystem.Table.Table;
 import IvanovVasil.OrderManagmentSystem.Table.TableState;
 import lombok.Builder;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -18,5 +19,6 @@ public record OrderResultDTO(
         OrderState orderState,
         TableState tableState,
         Double totalPrice,
-        Double remainingToPay) {
+        Double remainingToPay,
+        LocalDateTime dateTime) {
 }

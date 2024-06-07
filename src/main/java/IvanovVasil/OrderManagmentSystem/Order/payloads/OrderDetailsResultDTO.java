@@ -7,13 +7,12 @@ import java.util.UUID;
 
 @Builder
 public record OrderDetailsResultDTO(
-        UUID productId,
-        String productName,
-        String productDescription,
+        UUID id,
+        String name,
         Long quantity,
         Long preparedQuantity,
         Long paidQuantity,
-        double productPrice,
+        double price,
         UUID orderId,
         UUID tableId,
         Long tableNumber,

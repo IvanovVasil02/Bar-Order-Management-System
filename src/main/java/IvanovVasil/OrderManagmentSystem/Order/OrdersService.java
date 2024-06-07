@@ -13,12 +13,18 @@ import IvanovVasil.OrderManagmentSystem.Product.entities.Product;
 import IvanovVasil.OrderManagmentSystem.Product.ProductsService;
 import IvanovVasil.OrderManagmentSystem.Table.Table;
 import IvanovVasil.OrderManagmentSystem.Table.TableState;
-import IvanovVasil.OrderManagmentSystem.Table.TablesSerice;
+import IvanovVasil.OrderManagmentSystem.Table.TablesRepository;
 import IvanovVasil.OrderManagmentSystem.exceptions.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -29,7 +35,7 @@ public class OrdersService {
   @Autowired
   OrdersRepository or;
   @Autowired
-  TablesSerice ts;
+  TablesRepository ts;
 
   @Autowired
   ProductsService ps;
@@ -37,16 +43,29 @@ public class OrdersService {
   @Autowired
   OrderDetailsRepository odr;
 
-  public Order save(Order table) {
-    return or.save(table);
+  public Order save(Order order) {
+    return or.save(order);
   }
 
   public Order findById(UUID id) {
     return or.findById(id).orElseThrow(() -> new NotFoundException(id));
   }
 
+  public Order findByOrderState(OrderState state, UUID tableId) {
+    return or.findByOrderStateAndTableId(state, tableId);
+  }
+
   public List<OrderResultDTO> getAllOrders() {
     return or.findAll().stream().map(this::convertOrderResultToDTO).toList();
+  }
+
+  public Page<OrderResultDTO> getAllOrdersByDate(LocalDate date, int page, int size, String orderBy) {
+    LocalDateTime startOfDay = date.atStartOfDay();
+    LocalDateTime endOfDay = date.atTime(LocalTime.MAX);
+
+    Pageable pageable = PageRequest.of(page, size, Sort.by(orderBy));
+    Page<Order> orderList = or.findByDateTimeBetween(startOfDay, endOfDay, pageable);
+    return orderList.map(this::convertOrderResultToDTO);
   }
 
   public List<OrderResultDTO> getSingleTableOrders(UUID tableid) {
@@ -54,12 +73,17 @@ public class OrdersService {
   }
 
   public OrderResultDTO createOrder(OrderDTO body) {
-    Table table = ts.findById(body.tableId());
+    Table table = ts.findById(body.tableId()).orElseThrow(() -> new NotFoundException(body.tableId()));
+    System.out.println(table.getTableState());
 
-    if (table.getTableState() != TableState.TAKEN) {
+    if (table.getTableState() == TableState.FREE) {
+
+
       List<OrderDetails> orderDetailsList = new ArrayList<>();
       table.setTableState(TableState.TAKEN);
+
       double totalAmount = 0.0;
+
       Order order = Order
               .builder()
               .table(table)
@@ -68,8 +92,9 @@ public class OrdersService {
               .orderState(OrderState.PENDING)
               .build();
       this.save(order);
+
       for (OrderDetailsDTO odDTO : body.productList()) {
-        Product product = ps.findById(odDTO.productId());
+        Product product = ps.findById(odDTO.id());
         OrderDetails newOrderDetails = OrderDetails
                 .builder()
                 .order(order)
@@ -86,24 +111,27 @@ public class OrdersService {
       order.setProductList(orderDetailsList);
       updateOrdersTotalAmount(order);
       updateOrdersRemainingAmount(order);
-      Order savedOrder = this.save(order);
-      return this.convertOrderResultToDTO(savedOrder);
-    } else {
-      Order order = table.getOrder();
+      System.out.println(this.convertOrderResultToDTO(this.save(order)));
+
+    } else if (table.getTableState() == TableState.TAKEN) {
+      Order order = this.findByOrderState(OrderState.PENDING, table.getId());
+
       for (OrderDetailsDTO odDTO : body.productList()) {
-        Product product = ps.findById(odDTO.productId());
-        OrderDetails oldOrderDetails = odr.findByProductIdAndOrderId(odDTO.productId(), table.getOrder().getId());
+        Product product = ps.findById(odDTO.id());
+        OrderDetails oldOrderDetails = odr.findByProductIdAndOrderId(odDTO.id(), order.getId());
 
         oldOrderDetails.setQuantity(oldOrderDetails.getQuantity() + odDTO.quantity());
         updateOrderDetailsSubtotal(oldOrderDetails);
         odr.save(oldOrderDetails);
       }
+
       updateOrdersTotalAmount(order);
       updateOrdersRemainingAmount(order);
+
       Order savedOrder = this.save(order);
       return this.convertOrderResultToDTO(savedOrder);
-
     }
+    return null;
   }
 
   public OrderResultDTO payOrder(UUID id) {
@@ -115,20 +143,33 @@ public class OrdersService {
       updateOrderDetailsSubtotal(odts);
       odr.save(odts);
     }
+    table.setOrders(null);
     table.setTableState(TableState.FREE);
     ts.save(table);
     or.save(order);
     return convertOrderResultToDTO(order);
   }
 
-  public OrderResultDTO payPartialOrder(UUID orderId, List<OrderDetailsDTO> pruductsToPay) {
+  public OrderResultDTO addToOrder(UUID orderId, OrderDetailsDTO product) {
     Order order = or.findById(orderId).orElseThrow(() -> new NotFoundException(orderId));
-    Table table = order.getTable();
-    for (OrderDetailsDTO odtDTO : pruductsToPay) {
-      OrderDetails orderDetailsFound = odr.findByProductIdAndOrderId(odtDTO.productId(), orderId);
-      updateOrderDetailsPaiquantity(orderDetailsFound, odtDTO.quantity());
-      odr.save(orderDetailsFound);
-    }
+
+    OrderDetails orderDetailsFound = odr.findByProductIdAndOrderId(product.id(), orderId);
+    orderDetailsFound.setQuantity(orderDetailsFound.getQuantity() + product.quantity());
+    odr.save(orderDetailsFound);
+
+    updateOrdersTotalAmount(order);
+    updateOrdersRemainingAmount(order);
+    or.save(order);
+    return convertOrderResultToDTO(order);
+  }
+
+  public OrderResultDTO payPartialOrder(UUID orderId, OrderDetailsDTO pruductToPay) {
+    Order order = or.findById(orderId).orElseThrow(() -> new NotFoundException(orderId));
+
+    OrderDetails orderDetailsFound = odr.findByProductIdAndOrderId(pruductToPay.id(), orderId);
+    updateOrderDetailsPaiquantity(orderDetailsFound, pruductToPay.quantity());
+    odr.save(orderDetailsFound);
+
     updateOrdersTotalAmount(order);
     updateOrdersRemainingAmount(order);
     or.save(order);
@@ -175,6 +216,7 @@ public class OrdersService {
             .remainingToPay(order.getRemainingAmountToPay())
             .totalPrice(order.getTotalAmount())
             .tableState(order.getTable().getTableState())
+            .dateTime(order.getDateTime())
             .build();
   }
 
@@ -184,12 +226,12 @@ public class OrdersService {
             .orderId(orderDetails.getOrder().getId())
             .tableId(orderDetails.getOrder().getTable().getId())
             .tableNumber(orderDetails.getOrder().getTable().getTableNumber())
-            .productId(orderDetails.getProduct().getId())
-            .productName(orderDetails.getProduct().getName())
+            .id(orderDetails.getProduct().getId())
+            .name(orderDetails.getProduct().getName())
             .quantity(orderDetails.getQuantity())
             .preparedQuantity(orderDetails.getPreparedQuantity())
             .paidQuantity(orderDetails.getPaidQuantity())
-            .productPrice(orderDetails.getProduct().getPrice())
+            .price(orderDetails.getProduct().getPrice())
             .subtotal(orderDetails.getSubtotal())
             .localDateTime(orderDetails.getLocalDateTime())
             .build();

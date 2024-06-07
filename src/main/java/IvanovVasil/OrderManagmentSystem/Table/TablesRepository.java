@@ -7,4 +7,6 @@ import java.util.UUID;
 
 @Repository
 public interface TablesRepository extends JpaRepository<Table, UUID> {
+
+  void deleteAllByTableNumber(Long tableNumber);
 }

@@ -1,5 +1,9 @@
 package IvanovVasil.OrderManagmentSystem.Table;
 
+import IvanovVasil.OrderManagmentSystem.Order.OrdersService;
+import IvanovVasil.OrderManagmentSystem.Order.entities.Order;
+import IvanovVasil.OrderManagmentSystem.Order.enums.OrderState;
+import IvanovVasil.OrderManagmentSystem.Order.payloads.OrderResultDTO;
 import IvanovVasil.OrderManagmentSystem.exceptions.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,22 +16,49 @@ public class TablesSerice {
 
   @Autowired
   TablesRepository tr;
+  @Autowired
+  OrdersService os;
 
-  public Table save(Table table) {
-    return tr.save(table);
+  public void save(Table table) {
+    tr.save(table);
   }
 
   public Table findById(UUID id) {
     return tr.findById(id).orElseThrow(() -> new NotFoundException(id));
   }
 
-  public List<Table> getAllTables() {
-    return tr.findAll();
+  public List<TableResultDTO> getAllTables() {
+    return tr.findAll().stream().map((table) -> {
+              TableResultDTO.TableResultDTOBuilder builder = TableResultDTO
+                      .builder()
+                      .table_id(table.getId())
+                      .tableState(table.getTableState())
+                      .tableNumber(table.getTableNumber());
+
+              Order pendingOrder = os.findByOrderState(OrderState.PENDING, table.getId());
+
+              if (pendingOrder != null) {
+                OrderResultDTO orderDTO = os.convertOrderResultToDTO(pendingOrder);
+                builder.order(orderDTO);
+              } else {
+                builder.order(null);
+              }
+
+              return builder.build();
+            }
+    ).toList();
   }
 
   public Table createTable() {
     Table table = new Table();
     return tr.save(table);
+  }
+
+  public List<Table> createTables(int num) {
+    for (int i = 0; i < num - 1; i++) {
+      createTable();
+    }
+    return tr.findAll();
   }
 
   private void delete(Table table) {
@@ -36,5 +67,10 @@ public class TablesSerice {
 
   public void deleteTableById(UUID id) {
     tr.deleteById(id);
+  }
+
+
+  public void deleteTableByTableNumber(Long tableNumber) {
+    tr.deleteAllByTableNumber(tableNumber);
   }
 }

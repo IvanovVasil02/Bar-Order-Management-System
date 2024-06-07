@@ -1,7 +1,12 @@
 package IvanovVasil.OrderManagmentSystem.Product.enums;
 
-import IvanovVasil.OrderManagmentSystem.Product.interfaces.Subcategory;
-
-public enum DrinkCategory implements Subcategory {
-  JUICES, SODAS, TEA, BEER, COCKTAILS, MOCKTAILS, WATER, COFEE
+public enum DrinkCategory {
+  JUICES,
+  SODAS,
+  TEA,
+  BEER,
+  COCKTAILS,
+  MOCKTAILS,
+  WATER,
+  COFEE
 }

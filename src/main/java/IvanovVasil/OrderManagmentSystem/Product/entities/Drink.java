@@ -1,6 +1,7 @@
 package IvanovVasil.OrderManagmentSystem.Product.entities;
 
 import IvanovVasil.OrderManagmentSystem.Product.enums.DrinkCategory;
+import IvanovVasil.OrderManagmentSystem.Product.enums.ProductCategory;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -15,12 +16,13 @@ import lombok.*;
 @Setter
 public class Drink extends Product {
   @Enumerated(EnumType.STRING)
-  private DrinkCategory category;
+  private DrinkCategory subCategory;
   private Long quantity;
 
-  public Drink(String name, Double price, DrinkCategory category, Long quantity) {
+  public Drink(String name, Double price, DrinkCategory subCategory, Long quantity) {
     super(name, price);
-    this.category = category;
+    this.setProductCategory(ProductCategory.DRINK);
+    this.subCategory = subCategory;
     this.quantity = quantity;
   }
 }

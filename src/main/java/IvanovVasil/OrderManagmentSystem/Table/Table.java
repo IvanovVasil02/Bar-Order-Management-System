@@ -20,8 +20,8 @@ public class Table {
   private Long tableNumber;
   @Enumerated(EnumType.STRING)
   private TableState tableState = TableState.FREE;
-  @OneToOne(mappedBy = "table")
-  private Order order;
+  @OneToMany(mappedBy = "table", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
+  private List<Order> orders;
 
   public Table() {
     totalTables++;

@@ -6,7 +6,7 @@ import java.util.UUID;
 
 @Builder
 public record OrderDetailsDTO(
-        UUID productId,
+        UUID id,
         Long quantity,
         String note
 ) {
