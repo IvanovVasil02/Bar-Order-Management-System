@@ -18,9 +18,9 @@ public class AdminDataRunner implements ApplicationRunner {
     if (ur.findByEmail("admin@gmail.com") == null) {
       User admin = new User();
       admin.setEmail("admin@gmail.com");
-      admin.setPassword(bcrypt.encode("12345678"));
+      admin.setPassword(bcrypt.encode("1234567888"));
       ur.save(admin);
     }
   }
- 
+
 }
