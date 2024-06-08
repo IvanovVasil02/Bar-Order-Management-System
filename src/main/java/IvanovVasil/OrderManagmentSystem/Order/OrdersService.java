@@ -11,7 +11,7 @@ import IvanovVasil.OrderManagmentSystem.Order.repositories.OrderDetailsRepositor
 import IvanovVasil.OrderManagmentSystem.Order.repositories.OrdersRepository;
 import IvanovVasil.OrderManagmentSystem.Product.entities.Product;
 import IvanovVasil.OrderManagmentSystem.Product.ProductsService;
-import IvanovVasil.OrderManagmentSystem.Table.RestaurantTable;
+import IvanovVasil.OrderManagmentSystem.Table.Table;
 import IvanovVasil.OrderManagmentSystem.Table.TableState;
 import IvanovVasil.OrderManagmentSystem.Table.TablesRepository;
 import IvanovVasil.OrderManagmentSystem.exceptions.NotFoundException;
@@ -73,7 +73,7 @@ public class OrdersService {
   }
 
   public OrderResultDTO createOrder(OrderDTO body) {
-    RestaurantTable restaurantTable = ts.findById(body.tableId()).orElseThrow(() -> new NotFoundException(body.tableId()));
+    Table restaurantTable = ts.findById(body.tableId()).orElseThrow(() -> new NotFoundException(body.tableId()));
     System.out.println(restaurantTable.getTableState());
 
     if (restaurantTable.getTableState() == TableState.FREE) {
@@ -86,7 +86,7 @@ public class OrdersService {
 
       Order order = Order
               .builder()
-              .restaurantTable(restaurantTable)
+              .table(restaurantTable)
               .dateTime(LocalDateTime.now())
               .note(body.note())
               .orderState(OrderState.PENDING)
@@ -136,7 +136,7 @@ public class OrdersService {
 
   public OrderResultDTO payOrder(UUID id) {
     Order order = or.findById(id).orElseThrow(() -> new NotFoundException(id));
-    RestaurantTable restaurantTable = order.getRestaurantTable();
+    Table restaurantTable = order.getTable();
     order.setOrderState(OrderState.COMPLETED);
     order.setRemainingAmountToPay(0.0);
     for (OrderDetails odts : order.getProductList()) {
@@ -209,13 +209,13 @@ public class OrdersService {
     return OrderResultDTO
             .builder()
             .order_id(order.getId())
-            .table_id(order.getRestaurantTable().getId())
-            .tableNumber(order.getRestaurantTable().getTableNumber())
+            .table_id(order.getTable().getId())
+            .tableNumber(order.getTable().getTableNumber())
             .productList(order.getProductList().stream().map(this::convertOrderDetailsResultDTO).toList())
             .orderState(order.getOrderState())
             .remainingToPay(order.getRemainingAmountToPay())
             .totalPrice(order.getTotalAmount())
-            .tableState(order.getRestaurantTable().getTableState())
+            .tableState(order.getTable().getTableState())
             .dateTime(order.getDateTime())
             .build();
   }
@@ -224,8 +224,8 @@ public class OrdersService {
     return OrderDetailsResultDTO
             .builder()
             .orderId(orderDetails.getOrder().getId())
-            .tableId(orderDetails.getOrder().getRestaurantTable().getId())
-            .tableNumber(orderDetails.getOrder().getRestaurantTable().getTableNumber())
+            .tableId(orderDetails.getOrder().getTable().getId())
+            .tableNumber(orderDetails.getOrder().getTable().getTableNumber())
             .id(orderDetails.getProduct().getId())
             .name(orderDetails.getProduct().getName())
             .quantity(orderDetails.getQuantity())
