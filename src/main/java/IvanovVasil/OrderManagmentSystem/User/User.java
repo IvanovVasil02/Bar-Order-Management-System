@@ -1,9 +1,6 @@
 package IvanovVasil.OrderManagmentSystem.User;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,6 +19,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Getter
 @Setter
+@Table(name = "users")
 public class User implements UserDetails {
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
@@ -58,5 +56,5 @@ public class User implements UserDetails {
   public boolean isEnabled() {
     return true;
   }
-  
+
 }
