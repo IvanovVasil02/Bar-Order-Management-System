@@ -1,11 +1,9 @@
 package IvanovVasil.OrderManagmentSystem.Table;
 
-import jakarta.websocket.server.PathParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/tables")
@@ -20,7 +18,7 @@ public class TablesController {
   }
 
   @PostMapping("/addTables/{num}")
-  public List<Table> createTables(@PathVariable int num) {
+  public List<RestaurantTable> createTables(@PathVariable int num) {
     return ts.createTables(num);
   }
 

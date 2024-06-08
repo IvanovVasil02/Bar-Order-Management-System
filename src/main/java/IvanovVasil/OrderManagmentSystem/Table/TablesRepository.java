@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository;
 import java.util.UUID;
 
 @Repository
-public interface TablesRepository extends JpaRepository<Table, UUID> {
+public interface TablesRepository extends JpaRepository<RestaurantTable, UUID> {
 
   void deleteAllByTableNumber(Long tableNumber);
 }

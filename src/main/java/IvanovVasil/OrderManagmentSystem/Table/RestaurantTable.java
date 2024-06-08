@@ -12,7 +12,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @Builder
-public class Table {
+public class RestaurantTable {
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
   private UUID id;
@@ -23,7 +23,7 @@ public class Table {
   @OneToMany(mappedBy = "table", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
   private List<Order> orders;
 
-  public Table() {
+  public RestaurantTable() {
     totalTables++;
     this.tableNumber = totalTables;
   }

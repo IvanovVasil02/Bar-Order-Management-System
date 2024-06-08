@@ -1,8 +1,6 @@
 package IvanovVasil.OrderManagmentSystem.Order.payloads;
 
-import IvanovVasil.OrderManagmentSystem.Order.entities.OrderDetails;
 import IvanovVasil.OrderManagmentSystem.Order.enums.OrderState;
-import IvanovVasil.OrderManagmentSystem.Table.Table;
 import IvanovVasil.OrderManagmentSystem.Table.TableState;
 import lombok.Builder;
 
