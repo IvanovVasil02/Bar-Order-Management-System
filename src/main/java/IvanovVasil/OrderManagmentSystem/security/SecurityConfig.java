@@ -51,7 +51,7 @@ public class SecurityConfig {
   @Bean
   CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration configuration = new CorsConfiguration();
-    configuration.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:5174", "http://192.168.1.6:5173/", "http://localhost:5173/", "https://order-bar-orders-management-system-front-end.vercel.app/"));
+    configuration.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:5174", "http://192.168.1.6:5173/", "bar-order-management-system-production.up.railway.app", "http://localhost:5173/", "https://order-bar-orders-management-system-front-end.vercel.app/"));
     configuration.setAllowedMethods(List.of("*"));
     configuration.setAllowedHeaders(List.of("*"));
     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
