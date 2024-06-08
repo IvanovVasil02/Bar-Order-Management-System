@@ -1,7 +1,7 @@
 package IvanovVasil.OrderManagmentSystem.Order.entities;
 
 import IvanovVasil.OrderManagmentSystem.Order.enums.OrderState;
-import IvanovVasil.OrderManagmentSystem.Table.Table;
+import IvanovVasil.OrderManagmentSystem.Table.RestaurantTable;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -22,7 +22,7 @@ public class Order {
   private UUID id;
   @ManyToOne
   @JoinColumn(name = "table_id")
-  private Table table;
+  private RestaurantTable restaurantTable;
   private LocalDateTime dateTime;
   @OneToMany(mappedBy = "order", cascade = CascadeType.PERSIST, orphanRemoval = true, fetch = FetchType.EAGER)
   private List<OrderDetails> productList = new ArrayList<>();
@@ -36,7 +36,7 @@ public class Order {
   public String toString() {
     return "Order{" +
             "id=" + id +
-            ", table=" + table.getTableNumber() +
+            ", table=" + restaurantTable.getTableNumber() +
             ", dateTime=" + dateTime +
             ", note='" + note + '\'' +
             ", totalPrice=" + totalAmount +

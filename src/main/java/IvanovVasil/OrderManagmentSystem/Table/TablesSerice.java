@@ -19,11 +19,11 @@ public class TablesSerice {
   @Autowired
   OrdersService os;
 
-  public void save(Table table) {
-    tr.save(table);
+  public void save(RestaurantTable restaurantTable) {
+    tr.save(restaurantTable);
   }
 
-  public Table findById(UUID id) {
+  public RestaurantTable findById(UUID id) {
     return tr.findById(id).orElseThrow(() -> new NotFoundException(id));
   }
 
@@ -49,20 +49,20 @@ public class TablesSerice {
     ).toList();
   }
 
-  public Table createTable() {
-    Table table = new Table();
-    return tr.save(table);
+  public RestaurantTable createTable() {
+    RestaurantTable restaurantTable = new RestaurantTable();
+    return tr.save(restaurantTable);
   }
 
-  public List<Table> createTables(int num) {
+  public List<RestaurantTable> createTables(int num) {
     for (int i = 0; i < num - 1; i++) {
       createTable();
     }
     return tr.findAll();
   }
 
-  private void delete(Table table) {
-    tr.deleteById(table.getId());
+  private void delete(RestaurantTable restaurantTable) {
+    tr.deleteById(restaurantTable.getId());
   }
 
   public void deleteTableById(UUID id) {

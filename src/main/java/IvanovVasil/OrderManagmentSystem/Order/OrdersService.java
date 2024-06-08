@@ -11,7 +11,7 @@ import IvanovVasil.OrderManagmentSystem.Order.repositories.OrderDetailsRepositor
 import IvanovVasil.OrderManagmentSystem.Order.repositories.OrdersRepository;
 import IvanovVasil.OrderManagmentSystem.Product.entities.Product;
 import IvanovVasil.OrderManagmentSystem.Product.ProductsService;
-import IvanovVasil.OrderManagmentSystem.Table.Table;
+import IvanovVasil.OrderManagmentSystem.Table.RestaurantTable;
 import IvanovVasil.OrderManagmentSystem.Table.TableState;
 import IvanovVasil.OrderManagmentSystem.Table.TablesRepository;
 import IvanovVasil.OrderManagmentSystem.exceptions.NotFoundException;
@@ -73,20 +73,20 @@ public class OrdersService {
   }
 
   public OrderResultDTO createOrder(OrderDTO body) {
-    Table table = ts.findById(body.tableId()).orElseThrow(() -> new NotFoundException(body.tableId()));
-    System.out.println(table.getTableState());
+    RestaurantTable restaurantTable = ts.findById(body.tableId()).orElseThrow(() -> new NotFoundException(body.tableId()));
+    System.out.println(restaurantTable.getTableState());
 
-    if (table.getTableState() == TableState.FREE) {
+    if (restaurantTable.getTableState() == TableState.FREE) {
 
 
       List<OrderDetails> orderDetailsList = new ArrayList<>();
-      table.setTableState(TableState.TAKEN);
+      restaurantTable.setTableState(TableState.TAKEN);
 
       double totalAmount = 0.0;
 
       Order order = Order
               .builder()
-              .table(table)
+              .restaurantTable(restaurantTable)
               .dateTime(LocalDateTime.now())
               .note(body.note())
               .orderState(OrderState.PENDING)
@@ -113,8 +113,8 @@ public class OrdersService {
       updateOrdersRemainingAmount(order);
       System.out.println(this.convertOrderResultToDTO(this.save(order)));
 
-    } else if (table.getTableState() == TableState.TAKEN) {
-      Order order = this.findByOrderState(OrderState.PENDING, table.getId());
+    } else if (restaurantTable.getTableState() == TableState.TAKEN) {
+      Order order = this.findByOrderState(OrderState.PENDING, restaurantTable.getId());
 
       for (OrderDetailsDTO odDTO : body.productList()) {
         Product product = ps.findById(odDTO.id());
@@ -136,16 +136,16 @@ public class OrdersService {
 
   public OrderResultDTO payOrder(UUID id) {
     Order order = or.findById(id).orElseThrow(() -> new NotFoundException(id));
-    Table table = order.getTable();
+    RestaurantTable restaurantTable = order.getRestaurantTable();
     order.setOrderState(OrderState.COMPLETED);
     order.setRemainingAmountToPay(0.0);
     for (OrderDetails odts : order.getProductList()) {
       updateOrderDetailsSubtotal(odts);
       odr.save(odts);
     }
-    table.setOrders(null);
-    table.setTableState(TableState.FREE);
-    ts.save(table);
+    restaurantTable.setOrders(null);
+    restaurantTable.setTableState(TableState.FREE);
+    ts.save(restaurantTable);
     or.save(order);
     return convertOrderResultToDTO(order);
   }
@@ -209,13 +209,13 @@ public class OrdersService {
     return OrderResultDTO
             .builder()
             .order_id(order.getId())
-            .table_id(order.getTable().getId())
-            .tableNumber(order.getTable().getTableNumber())
+            .table_id(order.getRestaurantTable().getId())
+            .tableNumber(order.getRestaurantTable().getTableNumber())
             .productList(order.getProductList().stream().map(this::convertOrderDetailsResultDTO).toList())
             .orderState(order.getOrderState())
             .remainingToPay(order.getRemainingAmountToPay())
             .totalPrice(order.getTotalAmount())
-            .tableState(order.getTable().getTableState())
+            .tableState(order.getRestaurantTable().getTableState())
             .dateTime(order.getDateTime())
             .build();
   }
@@ -224,8 +224,8 @@ public class OrdersService {
     return OrderDetailsResultDTO
             .builder()
             .orderId(orderDetails.getOrder().getId())
-            .tableId(orderDetails.getOrder().getTable().getId())
-            .tableNumber(orderDetails.getOrder().getTable().getTableNumber())
+            .tableId(orderDetails.getOrder().getRestaurantTable().getId())
+            .tableNumber(orderDetails.getOrder().getRestaurantTable().getTableNumber())
             .id(orderDetails.getProduct().getId())
             .name(orderDetails.getProduct().getName())
             .quantity(orderDetails.getQuantity())
