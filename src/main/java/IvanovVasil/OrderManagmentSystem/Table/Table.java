@@ -12,6 +12,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @Builder
+@jakarta.persistence.Table(name = "restaurant_table")
 public class Table {
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
