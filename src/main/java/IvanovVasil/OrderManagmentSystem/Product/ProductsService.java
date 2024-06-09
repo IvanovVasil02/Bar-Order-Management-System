@@ -33,7 +33,7 @@ public class ProductsService {
     return pr.findAll();
   }
 
-  public void createProduct(ProductDTO body) {
+  public Product createProduct(ProductDTO body) {
     Product product;
 
     if (ProductCategory.valueOf(body.productCategory()) == ProductCategory.HOT_DISHES) {
@@ -54,7 +54,7 @@ public class ProductsService {
       throw new IllegalArgumentException("Invalid product category");
     }
 
-    pr.save(product);
+    return pr.save(product);
   }
 
   public Product editProduct(UUID productId, ProductDTO body) {

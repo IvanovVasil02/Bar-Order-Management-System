@@ -25,7 +25,7 @@ public class ProductsController {
   }
 
   @PostMapping("")
-  public void createProduct(@RequestBody ProductDTO body) {
+  public Product createProduct(@RequestBody ProductDTO body) {
 
     if (Arrays.stream(HotDishesCategory.values()).anyMatch(category -> category.name().equals(body.productSubCategory()))) {
       System.out.println(" è presente");
@@ -34,7 +34,7 @@ public class ProductsController {
     }
 
 
-    ps.createProduct(body);
+    return ps.createProduct(body);
   }
 
   @PutMapping("")
