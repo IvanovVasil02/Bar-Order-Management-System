@@ -8,6 +8,7 @@ import IvanovVasil.OrderManagmentSystem.exceptions.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,25 +29,7 @@ public class TablesSerice {
   }
 
   public List<TableResultDTO> getAllTables() {
-    return tr.findAll().stream().map((table) -> {
-              TableResultDTO.TableResultDTOBuilder builder = TableResultDTO
-                      .builder()
-                      .table_id(table.getId())
-                      .tableState(table.getTableState())
-                      .tableNumber(table.getTableNumber());
-
-              Order pendingOrder = os.findByOrderState(OrderState.PENDING, table.getId());
-
-              if (pendingOrder != null) {
-                OrderResultDTO orderDTO = os.convertOrderResultToDTO(pendingOrder);
-                builder.order(orderDTO);
-              } else {
-                builder.order(null);
-              }
-
-              return builder.build();
-            }
-    ).toList();
+    return tr.findAll().stream().map(this::convetToTableDTO).toList();
   }
 
   public Table createTable() {
@@ -54,11 +37,12 @@ public class TablesSerice {
     return tr.save(restaurantTable);
   }
 
-  public List<Table> createTables(int num) {
+  public List<TableResultDTO> createTables(int num) {
+    List<TableResultDTO> tableList = new ArrayList<>();
     for (int i = 0; i < num - 1; i++) {
-      createTable();
+      tableList.add(convetToTableDTO(createTable()));
     }
-    return tr.findAll();
+    return tableList;
   }
 
   private void delete(Table restaurantTable) {
@@ -72,5 +56,22 @@ public class TablesSerice {
 
   public void deleteTableByTableNumber(Long tableNumber) {
     tr.deleteAllByTableNumber(tableNumber);
+  }
+
+  public TableResultDTO convetToTableDTO(Table table) {
+    TableResultDTO.TableResultDTOBuilder builder =
+            TableResultDTO.builder()
+                    .table_id(table.getId())
+                    .tableNumber(table.getTableNumber())
+                    .tableState(table.getTableState());
+    Order pendingOrder = os.findByOrderState(OrderState.PENDING, table.getId());
+
+    if (pendingOrder != null) {
+      OrderResultDTO orderDTO = os.convertOrderResultToDTO(pendingOrder);
+      builder.order(orderDTO);
+    } else {
+      builder.order(null);
+    }
+    return builder.build();
   }
 }

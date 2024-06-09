@@ -26,7 +26,6 @@ public class OrdersController {
     return os.getAllOrdersByDate(date, page, size, orderBy);
   }
 
-
   @GetMapping("/{tableid}")
   public List<OrderResultDTO> getSingleTableOrders(@PathVariable UUID tableid) {
     return os.getSingleTableOrders(tableid);
@@ -51,6 +50,5 @@ public class OrdersController {
   public OrderResultDTO payPartialOrder(@PathVariable UUID orderId, @RequestBody OrderDetailsDTO product) {
     return os.payPartialOrder(orderId, product);
   }
-
 
 }

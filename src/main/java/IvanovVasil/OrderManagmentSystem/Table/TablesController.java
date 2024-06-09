@@ -18,7 +18,7 @@ public class TablesController {
   }
 
   @PostMapping("/addTables/{num}")
-  public List<Table> createTables(@PathVariable int num) {
+  public List<TableResultDTO> createTables(@PathVariable int num) {
     return ts.createTables(num);
   }
 

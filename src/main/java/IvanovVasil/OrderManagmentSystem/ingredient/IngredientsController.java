@@ -24,12 +24,12 @@ public class IngredientsController {
   }
 
   @PostMapping("")
-  public List<Ingredient> addIngredient(@RequestBody IngredientDTO body) {
+  public Ingredient addIngredient(@RequestBody IngredientDTO body) {
     return is.save(body);
   }
 
   @PutMapping("")
-  public List<Ingredient> editIngredient(@RequestParam UUID ingredientId, @RequestBody IngredientDTO body) {
+  public Ingredient editIngredient(@RequestParam UUID ingredientId, @RequestBody IngredientDTO body) {
     return is.editIngredient(ingredientId, body);
   }
 

@@ -21,34 +21,30 @@ public class IngredientsService {
     return ir.save(ingredient);
   }
 
-  public List<Ingredient> save(IngredientDTO ingredient) {
+  public Ingredient save(IngredientDTO ingredient) {
     Ingredient ingredientFound = ir.findByNameIgnoreCase(ingredient.ingredientName());
 
     if (ingredientFound != null) {
       return null;
     }
-
     Ingredient newIngredient = Ingredient
             .builder()
             .name(ingredient.ingredientName())
             .ingredientCategory(IngredientCategory.valueOf(ingredient.ingredientCategory()))
             .build();
-    ir.save(newIngredient);
-
-    return ir.findAll();
+    return ir.save(newIngredient);
   }
 
   public Ingredient findById(UUID ingredientId) {
     return ir.findById(ingredientId).orElseThrow(() -> new NotFoundException(ingredientId));
   }
 
-  public List<Ingredient> editIngredient(UUID ingredientId, IngredientDTO ingredient) {
+  public Ingredient editIngredient(UUID ingredientId, IngredientDTO ingredient) {
     Ingredient ingredientFound = this.findById(ingredientId);
     if (!ingredient.ingredientName().isEmpty()) ingredientFound.setName(ingredient.ingredientName());
     if (!ingredient.ingredientCategory().isEmpty())
       ingredientFound.setIngredientCategory(IngredientCategory.valueOf(ingredient.ingredientCategory()));
-    ir.save(ingredientFound);
-    return ir.findAll();
+    return ir.save(ingredientFound);
   }
 
   public void delete(UUID ingredientID) {
