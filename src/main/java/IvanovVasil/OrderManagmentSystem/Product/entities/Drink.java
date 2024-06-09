@@ -2,10 +2,7 @@ package IvanovVasil.OrderManagmentSystem.Product.entities;
 
 import IvanovVasil.OrderManagmentSystem.Product.enums.DrinkCategory;
 import IvanovVasil.OrderManagmentSystem.Product.enums.ProductCategory;
-import jakarta.persistence.DiscriminatorValue;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
+import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
@@ -14,6 +11,7 @@ import lombok.*;
 @NoArgsConstructor
 @Getter
 @Setter
+@Table(name = "drinks")
 public class Drink extends Product {
   @Enumerated(EnumType.STRING)
   private DrinkCategory subCategory;

@@ -16,6 +16,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @Builder
+@jakarta.persistence.Table(name = "orders")
 public class Order {
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
