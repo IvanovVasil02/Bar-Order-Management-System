@@ -48,12 +48,19 @@ public class SecurityConfig {
     return new BCryptPasswordEncoder(11);
   }
 
+
   @Bean
   CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration configuration = new CorsConfiguration();
-    configuration.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:5174", "http://192.168.1.6:5173/", "http://localhost:5173/", "https://order-bar-orders-management-system-front-end.vercel.app"));
-    configuration.setAllowedMethods(List.of("*"));
+    configuration.setAllowedOriginPatterns(List.of(
+            "http://localhost:5173",
+            "http://localhost:5174",
+            "http://192.168.1.6:5173",
+            "https://order-bar-orders-management-system-front-end.vercel.app"
+    ));
+    configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
     configuration.setAllowedHeaders(List.of("*"));
+    configuration.setAllowCredentials(true);
     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
     source.registerCorsConfiguration("/**", configuration);
     return source;

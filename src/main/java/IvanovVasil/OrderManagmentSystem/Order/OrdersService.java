@@ -20,6 +20,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -42,6 +43,8 @@ public class OrdersService {
 
   @Autowired
   OrderDetailsRepository odr;
+  @Autowired
+  private SimpMessagingTemplate messagingTemplate;
 
   public Order save(Order order) {
     return or.save(order);
@@ -74,18 +77,17 @@ public class OrdersService {
 
   public OrderResultDTO createOrder(OrderDTO body) {
     Table restaurantTable = ts.findById(body.tableId()).orElseThrow(() -> new NotFoundException(body.tableId()));
-    System.out.println(restaurantTable.getTableState());
+    Order order;
+    List<OrderDetails> orderDetailsList = new ArrayList<>();
+    double totalAmount = 0.0;
+
 
     if (restaurantTable.getTableState() == TableState.FREE) {
 
-
-      List<OrderDetails> orderDetailsList = new ArrayList<>();
       restaurantTable.setTableState(TableState.TAKEN);
 
-      double totalAmount = 0.0;
 
-      Order order = Order
-              .builder()
+      order = Order.builder()
               .table(restaurantTable)
               .dateTime(LocalDateTime.now())
               .note(body.note())
@@ -111,27 +113,45 @@ public class OrdersService {
       order.setProductList(orderDetailsList);
       updateOrdersTotalAmount(order);
       updateOrdersRemainingAmount(order);
-      System.out.println(this.convertOrderResultToDTO(this.save(order)));
 
     } else if (restaurantTable.getTableState() == TableState.TAKEN) {
-      Order order = this.findByOrderState(OrderState.PENDING, restaurantTable.getId());
+      order = this.findByOrderState(OrderState.PENDING, restaurantTable.getId());
 
       for (OrderDetailsDTO odDTO : body.productList()) {
         Product product = ps.findById(odDTO.id());
         OrderDetails oldOrderDetails = odr.findByProductIdAndOrderId(odDTO.id(), order.getId());
 
-        oldOrderDetails.setQuantity(oldOrderDetails.getQuantity() + odDTO.quantity());
-        updateOrderDetailsSubtotal(oldOrderDetails);
-        odr.save(oldOrderDetails);
+        if (oldOrderDetails != null) {
+          oldOrderDetails.setQuantity(oldOrderDetails.getQuantity() + odDTO.quantity());
+          updateOrderDetailsSubtotal(oldOrderDetails);
+          odr.save(oldOrderDetails);
+        } else {
+          OrderDetails newOrderDetails = OrderDetails.builder()
+                  .order(order)
+                  .product(product)
+                  .quantity(odDTO.quantity())
+                  .paidQuantity(0L)
+                  .localDateTime(LocalDateTime.now())
+                  .subtotal(product.getPrice() * odDTO.quantity())
+                  .build();
+          odr.save(newOrderDetails);
+          orderDetailsList.add(newOrderDetails);
+        }
       }
-
+      order.setProductList(orderDetailsList);
       updateOrdersTotalAmount(order);
       updateOrdersRemainingAmount(order);
 
-      Order savedOrder = this.save(order);
-      return this.convertOrderResultToDTO(savedOrder);
+      this.save(order);
+
+    } else {
+      throw new IllegalStateException("Invalid table state: " + restaurantTable.getTableState());
     }
-    return null;
+
+    OrderResultDTO result = convertOrderResultToDTO(order);
+    messagingTemplate.convertAndSend("/topic/orders", result);
+
+    return result;
   }
 
   public OrderResultDTO payOrder(UUID id) {
