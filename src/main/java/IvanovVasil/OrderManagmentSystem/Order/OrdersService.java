@@ -15,12 +15,13 @@ import IvanovVasil.OrderManagmentSystem.Table.Table;
 import IvanovVasil.OrderManagmentSystem.Table.TableState;
 import IvanovVasil.OrderManagmentSystem.Table.TablesRepository;
 import IvanovVasil.OrderManagmentSystem.exceptions.NotFoundException;
+import IvanovVasil.OrderManagmentSystem.webSocket.ChatMessageService;
+import IvanovVasil.OrderManagmentSystem.webSocket.ElementToUp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -43,8 +44,9 @@ public class OrdersService {
 
   @Autowired
   OrderDetailsRepository odr;
+
   @Autowired
-  private SimpMessagingTemplate messagingTemplate;
+  private ChatMessageService cms;
 
   public Order save(Order order) {
     return or.save(order);
@@ -148,10 +150,8 @@ public class OrdersService {
       throw new IllegalStateException("Invalid table state: " + restaurantTable.getTableState());
     }
 
-    OrderResultDTO result = convertOrderResultToDTO(order);
-    messagingTemplate.convertAndSend("/topic/orders", result);
-
-    return result;
+    cms.sendUpdateMessage(ElementToUp.ORDER);
+    return convertOrderResultToDTO(order);
   }
 
   public OrderResultDTO payOrder(UUID id) {
@@ -167,6 +167,7 @@ public class OrdersService {
     restaurantTable.setTableState(TableState.FREE);
     ts.save(restaurantTable);
     or.save(order);
+    cms.sendUpdateMessage(ElementToUp.INGREDIENT);
     return convertOrderResultToDTO(order);
   }
 
@@ -180,6 +181,7 @@ public class OrdersService {
     updateOrdersTotalAmount(order);
     updateOrdersRemainingAmount(order);
     or.save(order);
+    cms.sendUpdateMessage(ElementToUp.ORDER);
     return convertOrderResultToDTO(order);
   }
 
@@ -193,11 +195,13 @@ public class OrdersService {
     updateOrdersTotalAmount(order);
     updateOrdersRemainingAmount(order);
     or.save(order);
+    cms.sendUpdateMessage(ElementToUp.ORDER);
     return convertOrderResultToDTO(order);
   }
 
   private void delete(Order order) {
     or.deleteById(order.getId());
+    cms.sendUpdateMessage(ElementToUp.ORDER);
   }
 
   public void updateOrdersTotalAmount(Order order) {

@@ -1,9 +1,7 @@
 package IvanovVasil.OrderManagmentSystem.Order.payloads;
 
-import IvanovVasil.OrderManagmentSystem.Order.entities.OrderDetails;
 import lombok.Builder;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 

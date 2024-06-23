@@ -1,6 +1,6 @@
 package IvanovVasil.OrderManagmentSystem.webSocket;
 
-public enum ElementType {
+public enum ElementToUp {
   INGREDIENT,
   PRODUCT,
   TABLE,

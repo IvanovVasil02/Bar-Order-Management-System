@@ -2,7 +2,6 @@ package IvanovVasil.OrderManagmentSystem.security;
 
 import IvanovVasil.OrderManagmentSystem.User.User;
 import IvanovVasil.OrderManagmentSystem.User.UsersRepository;
-import IvanovVasil.OrderManagmentSystem.User.UsersService;
 import IvanovVasil.OrderManagmentSystem.exceptions.NotFoundException;
 import IvanovVasil.OrderManagmentSystem.exceptions.UnauthorizedException;
 import jakarta.servlet.FilterChain;

@@ -1,11 +1,9 @@
 package IvanovVasil.OrderManagmentSystem.Product;
 
-import IvanovVasil.OrderManagmentSystem.Product.entities.HotDishes;
 import IvanovVasil.OrderManagmentSystem.Product.entities.Product;
 import IvanovVasil.OrderManagmentSystem.Product.enums.HotDishesCategory;
 import IvanovVasil.OrderManagmentSystem.Product.payloads.ProductDTO;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;

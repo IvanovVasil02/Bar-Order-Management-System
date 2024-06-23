@@ -9,6 +9,8 @@ import IvanovVasil.OrderManagmentSystem.Product.enums.ProductCategory;
 import IvanovVasil.OrderManagmentSystem.Product.interfaces.ProductsRepository;
 import IvanovVasil.OrderManagmentSystem.Product.payloads.ProductDTO;
 import IvanovVasil.OrderManagmentSystem.exceptions.NotFoundException;
+import IvanovVasil.OrderManagmentSystem.webSocket.ChatMessageService;
+import IvanovVasil.OrderManagmentSystem.webSocket.ElementToUp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +22,9 @@ public class ProductsService {
 
   @Autowired
   ProductsRepository pr;
+
+  @Autowired
+  ChatMessageService cms;
 
   public Product save(Product product) {
     return pr.save(product);
@@ -54,7 +59,9 @@ public class ProductsService {
       throw new IllegalArgumentException("Invalid product category");
     }
 
-    return pr.save(product);
+    pr.save(product);
+    cms.sendUpdateMessage(ElementToUp.PRODUCT);
+    return product;
   }
 
   public Product editProduct(UUID productId, ProductDTO body) {
@@ -107,12 +114,14 @@ public class ProductsService {
       }
     }
 
-    return pr.save(product);
-
+    pr.save(product);
+    cms.sendUpdateMessage(ElementToUp.PRODUCT);
+    return product;
   }
 
 
   protected void delete(UUID id) {
     pr.deleteById(id);
+    cms.sendUpdateMessage(ElementToUp.PRODUCT);
   }
 }

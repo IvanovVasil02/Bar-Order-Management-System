@@ -2,7 +2,6 @@ package IvanovVasil.OrderManagmentSystem.Product.entities;
 
 import IvanovVasil.OrderManagmentSystem.Product.enums.ProductCategory;
 import jakarta.persistence.*;
-import jdk.jfr.Category;
 import lombok.*;
 
 import java.util.UUID;

@@ -5,6 +5,8 @@ import IvanovVasil.OrderManagmentSystem.Order.entities.Order;
 import IvanovVasil.OrderManagmentSystem.Order.enums.OrderState;
 import IvanovVasil.OrderManagmentSystem.Order.payloads.OrderResultDTO;
 import IvanovVasil.OrderManagmentSystem.exceptions.NotFoundException;
+import IvanovVasil.OrderManagmentSystem.webSocket.ChatMessageService;
+import IvanovVasil.OrderManagmentSystem.webSocket.ElementToUp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +22,9 @@ public class TablesSerice {
   @Autowired
   OrdersService os;
 
+  @Autowired
+  ChatMessageService cms;
+
   public void save(Table restaurantTable) {
     tr.save(restaurantTable);
   }
@@ -34,7 +39,9 @@ public class TablesSerice {
 
   public Table createTable() {
     Table restaurantTable = new Table();
-    return tr.save(restaurantTable);
+    tr.save(restaurantTable);
+    cms.sendUpdateMessage(ElementToUp.TABLE);
+    return restaurantTable;
   }
 
   public List<TableResultDTO> createTables(int num) {
@@ -42,20 +49,24 @@ public class TablesSerice {
     for (int i = 0; i < num - 1; i++) {
       tableList.add(convetToTableDTO(createTable()));
     }
+    cms.sendUpdateMessage(ElementToUp.TABLE);
     return tableList;
   }
 
   private void delete(Table restaurantTable) {
     tr.deleteById(restaurantTable.getId());
+    cms.sendUpdateMessage(ElementToUp.TABLE);
   }
 
   public void deleteTableById(UUID id) {
     tr.deleteById(id);
+    cms.sendUpdateMessage(ElementToUp.TABLE);
   }
 
 
   public void deleteTableByTableNumber(Long tableNumber) {
     tr.deleteAllByTableNumber(tableNumber);
+    cms.sendUpdateMessage(ElementToUp.TABLE);
   }
 
   public TableResultDTO convetToTableDTO(Table table) {
