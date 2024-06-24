@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
-public class TablesSerice {
+public class TablesService {
 
   @Autowired
   TablesRepository tr;
@@ -46,7 +46,7 @@ public class TablesSerice {
 
   public List<TableResultDTO> createTables(int num) {
     List<TableResultDTO> tableList = new ArrayList<>();
-    for (int i = 0; i < num - 1; i++) {
+    for (int i = 0; i < num; i++) {
       tableList.add(convetToTableDTO(createTable()));
     }
     cms.sendUpdateMessage(ElementToUp.TABLE);

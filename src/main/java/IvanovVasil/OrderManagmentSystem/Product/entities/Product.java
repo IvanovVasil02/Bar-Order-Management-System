@@ -22,6 +22,7 @@ public class Product {
   private UUID id;
   private String name;
   private Double price;
+  @Enumerated(EnumType.STRING)
   private ProductCategory productCategory;
 
   public Product(String name, Double price) {

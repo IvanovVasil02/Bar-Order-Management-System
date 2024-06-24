@@ -10,7 +10,7 @@ import java.util.List;
 public class TablesController {
 
   @Autowired
-  TablesSerice ts;
+  TablesService ts;
 
   @GetMapping("")
   public List<TableResultDTO> getTables() {

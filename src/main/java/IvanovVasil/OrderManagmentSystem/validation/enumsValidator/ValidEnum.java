@@ -1,4 +1,4 @@
-package IvanovVasil.OrderManagmentSystem.enumValidator;
+package IvanovVasil.OrderManagmentSystem.validation.enumsValidator;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;

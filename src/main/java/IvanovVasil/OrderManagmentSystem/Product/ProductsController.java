@@ -3,7 +3,10 @@ package IvanovVasil.OrderManagmentSystem.Product;
 import IvanovVasil.OrderManagmentSystem.Product.entities.Product;
 import IvanovVasil.OrderManagmentSystem.Product.enums.HotDishesCategory;
 import IvanovVasil.OrderManagmentSystem.Product.payloads.ProductDTO;
+import IvanovVasil.OrderManagmentSystem.exceptions.BadRequestException;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
@@ -23,21 +26,22 @@ public class ProductsController {
   }
 
   @PostMapping("")
-  public Product createProduct(@RequestBody ProductDTO body) {
+  public Product createProduct(@Valid @RequestBody ProductDTO body, BindingResult validation) {
 
-    if (Arrays.stream(HotDishesCategory.values()).anyMatch(category -> category.name().equals(body.productSubCategory()))) {
-      System.out.println(" è presente");
+    if (validation.hasErrors()) {
+      throw new BadRequestException("There was an issue with the entered product data!");
     } else {
-      System.out.println("non è presente ");
+      return ps.createProduct(body);
     }
-
-
-    return ps.createProduct(body);
   }
 
   @PutMapping("")
-  public Product editProduct(@RequestParam UUID productId, @RequestBody ProductDTO body) {
-    return ps.editProduct(productId, body);
+  public Product editProduct(@RequestParam UUID productId, @Valid @RequestBody ProductDTO body, BindingResult validation) {
+    if (validation.hasErrors()) {
+      throw new BadRequestException("There was an issue with the entered product data!");
+    } else {
+      return ps.editProduct(productId, body);
+    }
   }
 
   @DeleteMapping("")

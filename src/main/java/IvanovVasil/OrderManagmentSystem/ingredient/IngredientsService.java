@@ -1,5 +1,6 @@
 package IvanovVasil.OrderManagmentSystem.ingredient;
 
+import IvanovVasil.OrderManagmentSystem.exceptions.BadRequestException;
 import IvanovVasil.OrderManagmentSystem.exceptions.NotFoundException;
 import IvanovVasil.OrderManagmentSystem.webSocket.ChatMessageService;
 import IvanovVasil.OrderManagmentSystem.webSocket.ElementToUp;
@@ -22,7 +23,6 @@ public class IngredientsService {
   }
 
   public Ingredient save(Ingredient ingredient) {
-
     return ir.save(ingredient);
   }
 
@@ -30,7 +30,7 @@ public class IngredientsService {
     Ingredient ingredientFound = ir.findByNameIgnoreCase(ingredient.ingredientName());
 
     if (ingredientFound != null) {
-      throw new IllegalArgumentException("Ingredient already exists");
+      throw new BadRequestException("Ingredient already exists");
     }
 
     Ingredient newIngredient = Ingredient
@@ -50,9 +50,9 @@ public class IngredientsService {
 
   public Ingredient editIngredient(UUID ingredientId, IngredientDTO ingredient) {
     Ingredient ingredientFound = this.findById(ingredientId);
+
     if (!ingredient.ingredientName().isEmpty()) ingredientFound.setName(ingredient.ingredientName());
-    if (!ingredient.ingredientCategory().isEmpty())
-      ingredientFound.setIngredientCategory(IngredientCategory.valueOf(ingredient.ingredientCategory()));
+    ingredientFound.setIngredientCategory(IngredientCategory.valueOf(ingredient.ingredientCategory()));
     ir.save(ingredientFound);
 
     cms.sendUpdateMessage(ElementToUp.INGREDIENT);
@@ -60,8 +60,13 @@ public class IngredientsService {
   }
 
   public void delete(UUID ingredientID) {
-    ir.deleteById(ingredientID);
-    cms.sendUpdateMessage(ElementToUp.INGREDIENT);
+    Ingredient found = this.findById(ingredientID);
+    if (ingredientID != null) {
+      ir.deleteById(ingredientID);
+      cms.sendUpdateMessage(ElementToUp.INGREDIENT);
+    } else {
+      throw new BadRequestException("Ingredient id cannot be null");
+    }
   }
 
   public List<Ingredient> getAllIngredientsByCategory() {

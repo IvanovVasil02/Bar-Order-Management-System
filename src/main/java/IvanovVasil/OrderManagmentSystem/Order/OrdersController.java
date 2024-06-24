@@ -3,9 +3,12 @@ package IvanovVasil.OrderManagmentSystem.Order;
 import IvanovVasil.OrderManagmentSystem.Order.payloads.OrderDTO;
 import IvanovVasil.OrderManagmentSystem.Order.payloads.OrderDetailsDTO;
 import IvanovVasil.OrderManagmentSystem.Order.payloads.OrderResultDTO;
+import IvanovVasil.OrderManagmentSystem.exceptions.BadRequestException;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -32,8 +35,12 @@ public class OrdersController {
   }
 
   @PostMapping("")
-  public OrderResultDTO addOrder(@RequestBody OrderDTO body) {
-    return os.createOrder(body);
+  public OrderResultDTO addOrder(@Valid @RequestBody OrderDTO body, BindingResult validation) {
+    if (validation.hasErrors()) {
+      throw new BadRequestException("There was an issue with the data you submitted", validation.getAllErrors());
+    } else {
+      return os.createOrder(body);
+    }
   }
 
   @PutMapping("/payOrder/{orderId}")
@@ -42,13 +49,21 @@ public class OrdersController {
   }
 
   @PutMapping("/addToOrder/{orderId}")
-  public OrderResultDTO addToOrder(@PathVariable UUID orderId, @RequestBody OrderDetailsDTO product) {
-    return os.addToOrder(orderId, product);
+  public OrderResultDTO addToOrder(@PathVariable UUID orderId, @Valid @RequestBody OrderDetailsDTO product, BindingResult validation) {
+    if (validation.hasErrors()) {
+      throw new BadRequestException("There was an issue with the data you submitted", validation.getAllErrors());
+    } else {
+      return os.addToOrder(orderId, product);
+    }
   }
 
   @PutMapping("/payPartialOrder/{orderId}")
-  public OrderResultDTO payPartialOrder(@PathVariable UUID orderId, @RequestBody OrderDetailsDTO product) {
-    return os.payPartialOrder(orderId, product);
+  public OrderResultDTO payPartialOrder(@PathVariable UUID orderId, @Valid @RequestBody OrderDetailsDTO product, BindingResult validation) {
+    if (validation.hasErrors()) {
+      throw new BadRequestException("There was an issue with the data you submitted", validation.getAllErrors());
+    } else {
+      return os.payPartialOrder(orderId, product);
+    }
   }
 
 }

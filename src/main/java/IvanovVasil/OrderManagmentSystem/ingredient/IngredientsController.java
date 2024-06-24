@@ -1,7 +1,10 @@
 package IvanovVasil.OrderManagmentSystem.ingredient;
 
+import IvanovVasil.OrderManagmentSystem.exceptions.BadRequestException;
+import jakarta.validation.Valid;
 import jakarta.websocket.server.PathParam;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,19 +28,26 @@ public class IngredientsController {
   }
 
   @PostMapping("")
-  public Ingredient addIngredient(@RequestBody IngredientDTO body) {
-    return is.save(body);
+  public Ingredient addIngredient(@Valid @RequestBody IngredientDTO body, BindingResult validation) {
+    if (validation.hasErrors()) {
+      throw new BadRequestException("empty field", validation.getAllErrors());
+    } else {
+      return is.save(body);
+    }
   }
 
   @PutMapping("")
-  public Ingredient editIngredient(@RequestParam UUID ingredientId, @RequestBody IngredientDTO body) {
-    return is.editIngredient(ingredientId, body);
+  public Ingredient editIngredient(@RequestParam UUID ingredientId, @Valid @RequestBody IngredientDTO body, BindingResult validation) {
+    if (validation.hasErrors()) {
+      throw new BadRequestException("empty field", validation.getAllErrors());
+    } else {
+      return is.editIngredient(ingredientId, body);
+    }
   }
 
   @DeleteMapping("")
   public void deleteIngredient(@RequestParam UUID ingredientId) {
     is.delete(ingredientId);
   }
-
 
 }

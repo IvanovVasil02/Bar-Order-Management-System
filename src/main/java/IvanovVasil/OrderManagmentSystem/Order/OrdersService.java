@@ -17,6 +17,7 @@ import IvanovVasil.OrderManagmentSystem.Table.TablesRepository;
 import IvanovVasil.OrderManagmentSystem.exceptions.NotFoundException;
 import IvanovVasil.OrderManagmentSystem.webSocket.ChatMessageService;
 import IvanovVasil.OrderManagmentSystem.webSocket.ElementToUp;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -77,6 +78,7 @@ public class OrdersService {
     return or.findByTableId(tableid).stream().map(this::convertOrderResultToDTO).toList();
   }
 
+  @Transactional
   public OrderResultDTO createOrder(OrderDTO body) {
     Table restaurantTable = ts.findById(body.tableId()).orElseThrow(() -> new NotFoundException(body.tableId()));
     Order order;
@@ -99,15 +101,8 @@ public class OrdersService {
 
       for (OrderDetailsDTO odDTO : body.productList()) {
         Product product = ps.findById(odDTO.id());
-        OrderDetails newOrderDetails = OrderDetails
-                .builder()
-                .order(order)
-                .product(product)
-                .quantity(odDTO.quantity())
-                .paidQuantity(0L)
-                .localDateTime(LocalDateTime.now())
-                .subtotal(product.getPrice() * odDTO.quantity())
-                .build();
+        OrderDetails newOrderDetails = this.createOrderDetails(order, odDTO, product);
+
         odr.save(newOrderDetails);
         totalAmount += product.getPrice() * odDTO.quantity();
         orderDetailsList.add(newOrderDetails);
@@ -128,14 +123,7 @@ public class OrdersService {
           updateOrderDetailsSubtotal(oldOrderDetails);
           odr.save(oldOrderDetails);
         } else {
-          OrderDetails newOrderDetails = OrderDetails.builder()
-                  .order(order)
-                  .product(product)
-                  .quantity(odDTO.quantity())
-                  .paidQuantity(0L)
-                  .localDateTime(LocalDateTime.now())
-                  .subtotal(product.getPrice() * odDTO.quantity())
-                  .build();
+          OrderDetails newOrderDetails = this.createOrderDetails(order, odDTO, product);
           odr.save(newOrderDetails);
           orderDetailsList.add(newOrderDetails);
         }
@@ -204,17 +192,17 @@ public class OrdersService {
     cms.sendUpdateMessage(ElementToUp.ORDER);
   }
 
-  public void updateOrdersTotalAmount(Order order) {
+  private void updateOrdersTotalAmount(Order order) {
     Double totalAmountToPay = order.getProductList().stream().mapToDouble(e -> e.getQuantity() * e.getProduct().getPrice()).sum();
     order.setTotalAmount(totalAmountToPay);
   }
 
-  public void updateOrdersRemainingAmount(Order order) {
+  private void updateOrdersRemainingAmount(Order order) {
     Double remainingAmountToPay = order.getProductList().stream().mapToDouble(OrderDetails::getSubtotal).sum();
     order.setRemainingAmountToPay(remainingAmountToPay);
   }
 
-  public void updateOrderDetailsPaiquantity(OrderDetails orderDetails, long quantity) {
+  private void updateOrderDetailsPaiquantity(OrderDetails orderDetails, long quantity) {
     long paidQuantity = orderDetails.getPaidQuantity() + quantity;
     if (paidQuantity <= orderDetails.getQuantity()) {
       orderDetails.setPaidQuantity(paidQuantity);
@@ -222,12 +210,22 @@ public class OrdersService {
     }
   }
 
-  public void updateOrderDetailsSubtotal(OrderDetails orderDetails) {
+  private void updateOrderDetailsSubtotal(OrderDetails orderDetails) {
     double updatedSubTotal = (orderDetails.getQuantity() * orderDetails.getProduct().getPrice())
             - (orderDetails.getPaidQuantity() * orderDetails.getProduct().getPrice());
     orderDetails.setSubtotal(updatedSubTotal);
   }
 
+  private OrderDetails createOrderDetails(Order order, OrderDetailsDTO odDTO, Product product) {
+    return OrderDetails.builder()
+            .order(order)
+            .product(product)
+            .quantity(odDTO.quantity())
+            .paidQuantity(0L)
+            .localDateTime(LocalDateTime.now())
+            .subtotal(product.getPrice() * odDTO.quantity())
+            .build();
+  }
 
   public OrderResultDTO convertOrderResultToDTO(Order order) {
     return OrderResultDTO
