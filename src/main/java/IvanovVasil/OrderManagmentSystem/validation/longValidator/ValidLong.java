@@ -1,4 +1,4 @@
-package IvanovVasil.OrderManagmentSystem.validation.uuidsValidator;
+package IvanovVasil.OrderManagmentSystem.validation.longValidator;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
@@ -8,11 +8,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target({ElementType.FIELD, ElementType.METHOD, ElementType.CONSTRUCTOR, ElementType.ANNOTATION_TYPE})
+@Constraint(validatedBy = LongValidator.class)
+@Target({ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy = UUIDValidator.class)
-public @interface ValidUUID {
-  String message() default "Invalid UUID";
+public @interface ValidLong {
+  String message() default "Invalid long value";
 
   Class<?>[] groups() default {};
 

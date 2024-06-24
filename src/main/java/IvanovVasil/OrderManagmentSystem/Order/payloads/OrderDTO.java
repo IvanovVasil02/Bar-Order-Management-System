@@ -1,7 +1,6 @@
 package IvanovVasil.OrderManagmentSystem.Order.payloads;
 
 import IvanovVasil.OrderManagmentSystem.validation.uuidsValidator.ValidUUID;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 

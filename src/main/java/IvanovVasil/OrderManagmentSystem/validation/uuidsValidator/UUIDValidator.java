@@ -3,10 +3,11 @@ package IvanovVasil.OrderManagmentSystem.validation.uuidsValidator;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 
-public class UUIDValidator implements ConstraintValidator<ValidUUID, String> {
+public class UUIDValidator implements ConstraintValidator<ValidUUID, UUID> {
 
   private static final Pattern UUID_PATTERN = Pattern.compile("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}");
 
@@ -16,7 +17,9 @@ public class UUIDValidator implements ConstraintValidator<ValidUUID, String> {
   }
 
   @Override
-  public boolean isValid(String value, ConstraintValidatorContext context) {
-    return value != null && UUID_PATTERN.matcher(value).matches();
+  public boolean isValid(UUID value, ConstraintValidatorContext context) {
+    String uuid = String.valueOf(value);
+    return value != null && UUID_PATTERN.matcher(uuid).matches();
   }
+
 }

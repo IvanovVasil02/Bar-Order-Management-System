@@ -1,7 +1,6 @@
 package IvanovVasil.OrderManagmentSystem.Product;
 
 import IvanovVasil.OrderManagmentSystem.Product.entities.Product;
-import IvanovVasil.OrderManagmentSystem.Product.enums.HotDishesCategory;
 import IvanovVasil.OrderManagmentSystem.Product.payloads.ProductDTO;
 import IvanovVasil.OrderManagmentSystem.exceptions.BadRequestException;
 import jakarta.validation.Valid;
@@ -9,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -29,7 +27,7 @@ public class ProductsController {
   public Product createProduct(@Valid @RequestBody ProductDTO body, BindingResult validation) {
 
     if (validation.hasErrors()) {
-      throw new BadRequestException("There was an issue with the entered product data!");
+      throw new BadRequestException("There was an issue with the entered product data!", validation.getAllErrors());
     } else {
       return ps.createProduct(body);
     }
