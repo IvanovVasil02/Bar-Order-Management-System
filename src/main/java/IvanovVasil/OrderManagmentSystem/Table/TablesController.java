@@ -1,5 +1,10 @@
 package IvanovVasil.OrderManagmentSystem.Table;
 
+import IvanovVasil.OrderManagmentSystem.exceptions.BadRequestException;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,7 +23,7 @@ public class TablesController {
   }
 
   @PostMapping("/addTables/{num}")
-  public List<TableResultDTO> createTables(@PathVariable int num) {
+  public List<TableResultDTO> createTables(@PathVariable("num") int num) {
     return ts.createTables(num);
   }
 

@@ -5,5 +5,5 @@ import java.util.List;
 
 public record ErrorsListResponseDTO(String message,
                                     Date timeStamp,
-                                    List<String> errorsList) {
+                                    List<ErrorDetailDTO> errorsList) {
 }

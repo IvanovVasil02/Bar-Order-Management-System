@@ -81,8 +81,8 @@ public class ProductsService {
         hotDish.setName(body.productName());
       }
 
-      if (!body.price().isBlank()) {
-        hotDish.setPrice(Double.valueOf(body.price()));
+      if (!body.price().isNaN()) {
+        hotDish.setPrice(body.price());
       }
 
       if (!body.ingredientList().isEmpty()) {
@@ -105,12 +105,12 @@ public class ProductsService {
         drink.setName(body.productName());
       }
 
-      if (!body.price().isBlank()) {
-        drink.setPrice(Double.valueOf(body.price()));
+      if (!body.price().isNaN()) {
+        drink.setPrice(body.price());
       }
 
       if (body.quantity() != null) {
-        drink.setQuantity(Long.valueOf(body.quantity()));
+        drink.setQuantity(body.quantity());
       }
     }
 
