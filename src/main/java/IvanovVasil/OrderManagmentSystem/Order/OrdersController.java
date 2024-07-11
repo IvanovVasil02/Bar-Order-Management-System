@@ -3,6 +3,7 @@ package IvanovVasil.OrderManagmentSystem.Order;
 import IvanovVasil.OrderManagmentSystem.Order.payloads.OrderDTO;
 import IvanovVasil.OrderManagmentSystem.Order.payloads.OrderDetailsDTO;
 import IvanovVasil.OrderManagmentSystem.Order.payloads.OrderResultDTO;
+import IvanovVasil.OrderManagmentSystem.Table.TableResultDTO;
 import IvanovVasil.OrderManagmentSystem.exceptions.BadRequestException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +36,7 @@ public class OrdersController {
   }
 
   @PostMapping("")
-  public OrderResultDTO addOrder(@Valid @RequestBody OrderDTO body, BindingResult validation) {
+  public TableResultDTO addOrder(@Valid @RequestBody OrderDTO body, BindingResult validation) {
     if (validation.hasErrors()) {
       throw new BadRequestException("There was an issue with the data you submitted", validation.getAllErrors());
     } else {
@@ -49,7 +50,7 @@ public class OrdersController {
   }
 
   @PutMapping("/addToOrder/{orderId}")
-  public OrderResultDTO addToOrder(@PathVariable UUID orderId, @Valid @RequestBody OrderDetailsDTO product, BindingResult validation) {
+  public TableResultDTO addToOrder(@PathVariable UUID orderId, @Valid @RequestBody OrderDetailsDTO product, BindingResult validation) {
     if (validation.hasErrors()) {
       throw new BadRequestException("There was an issue with the data you submitted", validation.getAllErrors());
     } else {
@@ -62,7 +63,7 @@ public class OrdersController {
     if (validation.hasErrors()) {
       throw new BadRequestException("There was an issue with the data you submitted", validation.getAllErrors());
     } else {
-      
+
       return os.payPartialOrder(orderId, product);
     }
   }
