@@ -3,6 +3,7 @@ package IvanovVasil.OrderManagmentSystem.Order;
 import IvanovVasil.OrderManagmentSystem.Order.payloads.OrderDTO;
 import IvanovVasil.OrderManagmentSystem.Order.payloads.OrderDetailsDTO;
 import IvanovVasil.OrderManagmentSystem.Order.payloads.OrderResultDTO;
+import IvanovVasil.OrderManagmentSystem.Table.TableResultDTO;
 import IvanovVasil.OrderManagmentSystem.exceptions.BadRequestException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +36,7 @@ public class OrdersController {
   }
 
   @PostMapping("")
-  public OrderResultDTO addOrder(@Valid @RequestBody OrderDTO body, BindingResult validation) {
+  public TableResultDTO addOrder(@Valid @RequestBody OrderDTO body, BindingResult validation) {
     if (validation.hasErrors()) {
       throw new BadRequestException("There was an issue with the data you submitted", validation.getAllErrors());
     } else {
@@ -44,12 +45,12 @@ public class OrdersController {
   }
 
   @PutMapping("/payOrder/{orderId}")
-  public OrderResultDTO payOrder(@PathVariable UUID orderId) {
+  public TableResultDTO payOrder(@PathVariable UUID orderId) {
     return os.payOrder(orderId);
   }
 
   @PutMapping("/addToOrder/{orderId}")
-  public OrderResultDTO addToOrder(@PathVariable UUID orderId, @Valid @RequestBody OrderDetailsDTO product, BindingResult validation) {
+  public TableResultDTO addToOrder(@PathVariable UUID orderId, @Valid @RequestBody OrderDetailsDTO product, BindingResult validation) {
     if (validation.hasErrors()) {
       throw new BadRequestException("There was an issue with the data you submitted", validation.getAllErrors());
     } else {
@@ -58,11 +59,11 @@ public class OrdersController {
   }
 
   @PutMapping("/payPartialOrder/{orderId}")
-  public OrderResultDTO payPartialOrder(@PathVariable UUID orderId, @Valid @RequestBody OrderDetailsDTO product, BindingResult validation) {
+  public TableResultDTO payPartialOrder(@PathVariable UUID orderId, @Valid @RequestBody OrderDetailsDTO product, BindingResult validation) {
     if (validation.hasErrors()) {
       throw new BadRequestException("There was an issue with the data you submitted", validation.getAllErrors());
     } else {
-      
+
       return os.payPartialOrder(orderId, product);
     }
   }

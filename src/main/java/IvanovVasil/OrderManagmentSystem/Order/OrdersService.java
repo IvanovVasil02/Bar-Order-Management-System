@@ -12,6 +12,7 @@ import IvanovVasil.OrderManagmentSystem.Order.repositories.OrdersRepository;
 import IvanovVasil.OrderManagmentSystem.Product.entities.Product;
 import IvanovVasil.OrderManagmentSystem.Product.ProductsService;
 import IvanovVasil.OrderManagmentSystem.Table.Table;
+import IvanovVasil.OrderManagmentSystem.Table.TableResultDTO;
 import IvanovVasil.OrderManagmentSystem.Table.TableState;
 import IvanovVasil.OrderManagmentSystem.Table.TablesRepository;
 import IvanovVasil.OrderManagmentSystem.exceptions.NotFoundException;
@@ -79,7 +80,7 @@ public class OrdersService {
   }
 
   @Transactional
-  public OrderResultDTO createOrder(OrderDTO body) {
+  public TableResultDTO createOrder(OrderDTO body) {
     Table restaurantTable = ts.findById(body.tableId()).orElseThrow(() -> new NotFoundException(body.tableId()));
     Order order;
     List<OrderDetails> orderDetailsList = new ArrayList<>();
@@ -138,11 +139,18 @@ public class OrdersService {
       throw new IllegalStateException("Invalid table state: " + restaurantTable.getTableState());
     }
 
-    cms.sendUpdateMessage(ElementToUp.ORDER);
-    return convertOrderResultToDTO(order);
+    cms.sendUpdateMessage(ElementToUp.TABLE);
+    OrderResultDTO orderResultDTO = convertOrderResultToDTO(order);
+    return TableResultDTO
+            .builder()
+            .table_id(restaurantTable.getId())
+            .tableState(restaurantTable.getTableState())
+            .tableNumber(restaurantTable.getTableNumber())
+            .order(orderResultDTO)
+            .build();
   }
 
-  public OrderResultDTO payOrder(UUID id) {
+  public TableResultDTO payOrder(UUID id) {
     Order order = or.findById(id).orElseThrow(() -> new NotFoundException(id));
     Table restaurantTable = order.getTable();
     order.setOrderState(OrderState.COMPLETED);
@@ -155,25 +163,52 @@ public class OrdersService {
     restaurantTable.setTableState(TableState.FREE);
     ts.save(restaurantTable);
     or.save(order);
-    cms.sendUpdateMessage(ElementToUp.INGREDIENT);
-    return convertOrderResultToDTO(order);
+    cms.sendUpdateMessage(ElementToUp.TABLE);
+    OrderResultDTO orderResultDTO = convertOrderResultToDTO(order);
+    return TableResultDTO
+            .builder()
+            .table_id(order.getTable().getId())
+            .tableState(order.getTable().getTableState())
+            .tableNumber(order.getTable().getTableNumber())
+            .order(orderResultDTO)
+            .build();
   }
 
-  public OrderResultDTO addToOrder(UUID orderId, OrderDetailsDTO product) {
+  public TableResultDTO addToOrder(UUID orderId, OrderDetailsDTO product) {
     Order order = or.findById(orderId).orElseThrow(() -> new NotFoundException(orderId));
 
     OrderDetails orderDetailsFound = odr.findByProductIdAndOrderId(product.id(), orderId);
-    orderDetailsFound.setQuantity(orderDetailsFound.getQuantity() + product.quantity());
-    odr.save(orderDetailsFound);
+
+
+    if (orderDetailsFound != null) {
+      orderDetailsFound.setQuantity(orderDetailsFound.getQuantity() + product.quantity());
+      updateOrderDetailsSubtotal(orderDetailsFound);
+      odr.save(orderDetailsFound);
+    } else {
+      Product productFound = ps.findById(product.id());
+      OrderDetails newOrderDetails = this.createOrderDetails(order, product, productFound);
+      odr.save(newOrderDetails);
+      order.getProductList().add(newOrderDetails);
+    }
+
 
     updateOrdersTotalAmount(order);
     updateOrdersRemainingAmount(order);
+
     or.save(order);
     cms.sendUpdateMessage(ElementToUp.ORDER);
-    return convertOrderResultToDTO(order);
+
+    OrderResultDTO orderResultDTO = convertOrderResultToDTO(order);
+    return TableResultDTO
+            .builder()
+            .table_id(order.getTable().getId())
+            .tableState(order.getTable().getTableState())
+            .tableNumber(order.getTable().getTableNumber())
+            .order(orderResultDTO)
+            .build();
   }
 
-  public OrderResultDTO payPartialOrder(UUID orderId, OrderDetailsDTO pruductToPay) {
+  public TableResultDTO payPartialOrder(UUID orderId, OrderDetailsDTO pruductToPay) {
     Order order = or.findById(orderId).orElseThrow(() -> new NotFoundException(orderId));
 
     OrderDetails orderDetailsFound = odr.findByProductIdAndOrderId(pruductToPay.id(), orderId);
@@ -183,8 +218,15 @@ public class OrdersService {
     updateOrdersTotalAmount(order);
     updateOrdersRemainingAmount(order);
     or.save(order);
-    cms.sendUpdateMessage(ElementToUp.ORDER);
-    return convertOrderResultToDTO(order);
+    cms.sendUpdateMessage(ElementToUp.TABLE);
+    OrderResultDTO orderResultDTO = convertOrderResultToDTO(order);
+    return TableResultDTO
+            .builder()
+            .table_id(order.getTable().getId())
+            .tableState(order.getTable().getTableState())
+            .tableNumber(order.getTable().getTableNumber())
+            .order(orderResultDTO)
+            .build();
   }
 
   private void delete(Order order) {
@@ -211,9 +253,19 @@ public class OrdersService {
   }
 
   private void updateOrderDetailsSubtotal(OrderDetails orderDetails) {
-    double updatedSubTotal = (orderDetails.getQuantity() * orderDetails.getProduct().getPrice())
-            - (orderDetails.getPaidQuantity() * orderDetails.getProduct().getPrice());
+    if (orderDetails == null || orderDetails.getProduct() == null) {
+      throw new IllegalArgumentException("OrderDetails or Product cannot be null");
+    }
+
+    double price = orderDetails.getProduct().getPrice();
+    double quantity = orderDetails.getQuantity();
+    double paidQuantity = orderDetails.getPaidQuantity();
+
+    double updatedSubTotal = (quantity * price) - (paidQuantity * price);
     orderDetails.setSubtotal(updatedSubTotal);
+    if (orderDetails.getProduct() == null) {
+      throw new IllegalArgumentException("OrderDetails or Product cannot be null");
+    }
   }
 
   private OrderDetails createOrderDetails(Order order, OrderDetailsDTO odDTO, Product product) {
