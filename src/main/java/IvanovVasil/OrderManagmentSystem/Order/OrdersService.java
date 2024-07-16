@@ -139,7 +139,7 @@ public class OrdersService {
       throw new IllegalStateException("Invalid table state: " + restaurantTable.getTableState());
     }
 
-    cms.sendUpdateMessage(ElementToUp.ORDER);
+    cms.sendUpdateMessage(ElementToUp.TABLE);
     OrderResultDTO orderResultDTO = convertOrderResultToDTO(order);
     return TableResultDTO
             .builder()
@@ -150,7 +150,7 @@ public class OrdersService {
             .build();
   }
 
-  public OrderResultDTO payOrder(UUID id) {
+  public TableResultDTO payOrder(UUID id) {
     Order order = or.findById(id).orElseThrow(() -> new NotFoundException(id));
     Table restaurantTable = order.getTable();
     order.setOrderState(OrderState.COMPLETED);
@@ -163,8 +163,15 @@ public class OrdersService {
     restaurantTable.setTableState(TableState.FREE);
     ts.save(restaurantTable);
     or.save(order);
-    cms.sendUpdateMessage(ElementToUp.INGREDIENT);
-    return convertOrderResultToDTO(order);
+    cms.sendUpdateMessage(ElementToUp.TABLE);
+    OrderResultDTO orderResultDTO = convertOrderResultToDTO(order);
+    return TableResultDTO
+            .builder()
+            .table_id(order.getTable().getId())
+            .tableState(order.getTable().getTableState())
+            .tableNumber(order.getTable().getTableNumber())
+            .order(orderResultDTO)
+            .build();
   }
 
   public TableResultDTO addToOrder(UUID orderId, OrderDetailsDTO product) {
@@ -201,7 +208,7 @@ public class OrdersService {
             .build();
   }
 
-  public OrderResultDTO payPartialOrder(UUID orderId, OrderDetailsDTO pruductToPay) {
+  public TableResultDTO payPartialOrder(UUID orderId, OrderDetailsDTO pruductToPay) {
     Order order = or.findById(orderId).orElseThrow(() -> new NotFoundException(orderId));
 
     OrderDetails orderDetailsFound = odr.findByProductIdAndOrderId(pruductToPay.id(), orderId);
@@ -211,8 +218,15 @@ public class OrdersService {
     updateOrdersTotalAmount(order);
     updateOrdersRemainingAmount(order);
     or.save(order);
-    cms.sendUpdateMessage(ElementToUp.ORDER);
-    return convertOrderResultToDTO(order);
+    cms.sendUpdateMessage(ElementToUp.TABLE);
+    OrderResultDTO orderResultDTO = convertOrderResultToDTO(order);
+    return TableResultDTO
+            .builder()
+            .table_id(order.getTable().getId())
+            .tableState(order.getTable().getTableState())
+            .tableNumber(order.getTable().getTableNumber())
+            .order(orderResultDTO)
+            .build();
   }
 
   private void delete(Order order) {

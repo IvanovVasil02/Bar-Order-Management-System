@@ -45,7 +45,7 @@ public class OrdersController {
   }
 
   @PutMapping("/payOrder/{orderId}")
-  public OrderResultDTO payOrder(@PathVariable UUID orderId) {
+  public TableResultDTO payOrder(@PathVariable UUID orderId) {
     return os.payOrder(orderId);
   }
 
@@ -59,7 +59,7 @@ public class OrdersController {
   }
 
   @PutMapping("/payPartialOrder/{orderId}")
-  public OrderResultDTO payPartialOrder(@PathVariable UUID orderId, @Valid @RequestBody OrderDetailsDTO product, BindingResult validation) {
+  public TableResultDTO payPartialOrder(@PathVariable UUID orderId, @Valid @RequestBody OrderDetailsDTO product, BindingResult validation) {
     if (validation.hasErrors()) {
       throw new BadRequestException("There was an issue with the data you submitted", validation.getAllErrors());
     } else {
