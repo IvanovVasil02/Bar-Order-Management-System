@@ -1,6 +1,7 @@
 package IvanovVasil.OrderManagmentSystem.Table;
 
 import IvanovVasil.OrderManagmentSystem.Order.entities.Order;
+import IvanovVasil.OrderManagmentSystem.User.User;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -23,10 +24,13 @@ public class Table {
   private TableState tableState = TableState.FREE;
   @OneToMany(mappedBy = "table", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
   private List<Order> orders;
+  @ManyToOne
+  private User user;
 
-  public Table() {
+  public Table(User user) {
     totalTables++;
     this.tableNumber = totalTables;
+    this.user = user;
   }
 
 

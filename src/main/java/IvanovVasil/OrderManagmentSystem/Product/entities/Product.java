@@ -1,6 +1,7 @@
 package IvanovVasil.OrderManagmentSystem.Product.entities;
 
 import IvanovVasil.OrderManagmentSystem.Product.enums.ProductCategory;
+import IvanovVasil.OrderManagmentSystem.User.User;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -24,10 +25,14 @@ public class Product {
   private Double price;
   @Enumerated(EnumType.STRING)
   private ProductCategory productCategory;
+  @ManyToOne
+  @JoinColumn(name = "user_id")
+  private User user;
 
-  public Product(String name, Double price) {
+  public Product(String name, Double price, User user) {
     this.name = name;
     this.price = price;
+    this.user = user;
   }
 
 

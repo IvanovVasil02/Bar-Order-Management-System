@@ -1,6 +1,8 @@
 package IvanovVasil.OrderManagmentSystem.User;
 
 import IvanovVasil.OrderManagmentSystem.User.authentication.UserLoginDTO;
+import IvanovVasil.OrderManagmentSystem.User.authentication.UserRegistrationDTO;
+import IvanovVasil.OrderManagmentSystem.exceptions.BadRequestException;
 import IvanovVasil.OrderManagmentSystem.exceptions.NotFoundException;
 import IvanovVasil.OrderManagmentSystem.exceptions.UnauthorizedException;
 import IvanovVasil.OrderManagmentSystem.security.JWTTools;
@@ -37,15 +39,28 @@ public class UsersService {
     return ur.save(user);
   }
 
+  public User userRegistration(UserRegistrationDTO body) {
+    ur.findByEmail(body.email()).ifPresent(patient -> {
+      throw new BadRequestException("The email " + patient.getEmail() + " is alredy used.");
+    });
+
+    User user = User
+            .builder()
+            .name(body.name())
+            .surname(body.surname())
+            .email(body.email())
+            .password(bcrypt.encode(body.password()))
+            .phone(body.phone())
+            .address(body.address())
+            .build();
+
+    return save(user);
+  }
+
   public String authenticateUser(UserLoginDTO body) {
-    System.out.println(body.email() + " " + body.password());
-    User user = ur.findByEmail(body.email());
-    if (user != null) {
-      if (bcrypt.matches(body.password(), user.getPassword())) {
-        return jwtTools.createToken(user);
-      } else {
-        throw new UnauthorizedException("Email or password invalid.");
-      }
+    User user = ur.findByEmail(body.email()).orElseThrow(() -> new NotFoundException(body.email()));
+    if (bcrypt.matches(body.password(), user.getPassword())) {
+      return jwtTools.createToken(user);
     } else {
       throw new UnauthorizedException("Email or password invalid.");
     }

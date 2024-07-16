@@ -2,6 +2,7 @@ package IvanovVasil.OrderManagmentSystem.User;
 
 import IvanovVasil.OrderManagmentSystem.User.authentication.Token;
 import IvanovVasil.OrderManagmentSystem.User.authentication.UserLoginDTO;
+import IvanovVasil.OrderManagmentSystem.User.authentication.UserRegistrationDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,5 +19,10 @@ public class UsersController {
   @PostMapping("/login")
   public Token adminLogin(@RequestBody UserLoginDTO body) {
     return new Token(us.authenticateUser(body));
+  }
+
+  @PostMapping("/register")
+  public User adminLogin(@RequestBody UserRegistrationDTO body) {
+    return us.userRegistration(body);
   }
 }
