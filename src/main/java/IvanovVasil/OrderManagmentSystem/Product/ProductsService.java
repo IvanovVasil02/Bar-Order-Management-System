@@ -55,19 +55,21 @@ public class ProductsService {
               body.productName(),
               Double.parseDouble(String.valueOf(body.price())),
               HotDishesCategory.valueOf(body.productSubCategory()),
-              body.ingredientList()
+              body.ingredientList(),
+              user
       );
     } else if (ProductCategory.valueOf(body.productCategory()) == ProductCategory.DRINK) {
       product = new Drink(
               body.productName(),
               Double.parseDouble(String.valueOf(body.price())),
               DrinkCategory.valueOf(body.productSubCategory()),
-              (long) Integer.parseInt(String.valueOf(body.quantity()))
+              (long) Integer.parseInt(String.valueOf(body.quantity())),
+              user
       );
     } else {
       throw new IllegalArgumentException("Invalid product category");
     }
-    product.setUser(verifiedUser);
+   
     pr.save(product);
     cms.sendUpdateMessage(ElementToUp.PRODUCT);
     return product;

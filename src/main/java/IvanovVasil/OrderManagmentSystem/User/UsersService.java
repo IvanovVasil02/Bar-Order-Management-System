@@ -49,7 +49,7 @@ public class UsersService {
             .name(body.name())
             .surname(body.surname())
             .email(body.email())
-            .password(bcrypt.encode(body.password()))
+            .password(body.password())
             .phone(body.phone())
             .address(body.address())
             .build();
@@ -58,7 +58,8 @@ public class UsersService {
   }
 
   public String authenticateUser(UserLoginDTO body) {
-    User user = ur.findByEmail(body.email()).orElseThrow(() -> new NotFoundException(body.email()));
+    User user = ur.findByEmail(body.email()).orElseThrow(() -> new NotFoundException("There is no account with this email"));
+
     if (bcrypt.matches(body.password(), user.getPassword())) {
       return jwtTools.createToken(user);
     } else {
