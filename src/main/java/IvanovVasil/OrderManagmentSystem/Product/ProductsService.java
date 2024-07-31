@@ -69,7 +69,7 @@ public class ProductsService {
     } else {
       throw new IllegalArgumentException("Invalid product category");
     }
-   
+
     pr.save(product);
     cms.sendUpdateMessage(ElementToUp.PRODUCT);
     return product;
@@ -77,7 +77,7 @@ public class ProductsService {
 
   public Product editProduct(UUID productId, ProductDTO body, User user) {
     Product product = findById(productId);
-    if (product.getUser().getId() == user.getId()) {
+    if (product.getUser().getId().equals(user.getId())) {
       if (product.getProductCategory() == ProductCategory.HOT_DISHES) {
         HotDishes hotDish = (HotDishes) product;
 
@@ -86,7 +86,7 @@ public class ProductsService {
         }
 
         if (!body.productSubCategory().isEmpty()) {
-          hotDish.setSubCategory(HotDishesCategory.valueOf(body.productCategory()));
+          hotDish.setSubCategory(HotDishesCategory.valueOf(body.productSubCategory()));
         }
 
         if (!body.productName().isEmpty()) {

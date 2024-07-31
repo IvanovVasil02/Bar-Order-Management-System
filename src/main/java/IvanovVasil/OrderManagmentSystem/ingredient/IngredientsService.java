@@ -47,7 +47,7 @@ public class IngredientsService {
 
   public Ingredient editIngredient(UUID ingredientId, IngredientDTO ingredient, User user) {
     Ingredient ingredientFound = this.findById(ingredientId);
-    if (ingredientFound.getUser().getId() == user.getId()) {
+    if (ingredientFound.getUser().getId().equals(user.getId())) {
       if (!ingredient.ingredientName().isEmpty()) ingredientFound.setName(ingredient.ingredientName());
       ingredientFound.setIngredientCategory(IngredientCategory.valueOf(ingredient.ingredientCategory()));
       ir.save(ingredientFound);
