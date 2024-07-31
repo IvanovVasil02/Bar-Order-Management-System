@@ -15,7 +15,10 @@ import IvanovVasil.OrderManagmentSystem.Table.Table;
 import IvanovVasil.OrderManagmentSystem.Table.TableResultDTO;
 import IvanovVasil.OrderManagmentSystem.Table.TableState;
 import IvanovVasil.OrderManagmentSystem.Table.TablesRepository;
+import IvanovVasil.OrderManagmentSystem.User.User;
+import IvanovVasil.OrderManagmentSystem.User.UsersService;
 import IvanovVasil.OrderManagmentSystem.exceptions.NotFoundException;
+import IvanovVasil.OrderManagmentSystem.exceptions.UnauthorizedException;
 import IvanovVasil.OrderManagmentSystem.webSocket.ChatMessageService;
 import IvanovVasil.OrderManagmentSystem.webSocket.ElementToUp;
 import jakarta.transaction.Transactional;
@@ -46,6 +49,8 @@ public class OrdersService {
 
   @Autowired
   OrderDetailsRepository odr;
+  @Autowired
+  UsersService us;
 
   @Autowired
   private ChatMessageService cms;
@@ -66,12 +71,13 @@ public class OrdersService {
     return or.findAll().stream().map(this::convertOrderResultToDTO).toList();
   }
 
-  public Page<OrderResultDTO> getAllOrdersByDate(LocalDate date, int page, int size, String orderBy) {
+  public Page<OrderResultDTO> getAllOrdersByDate(LocalDate date, int page, int size, String orderBy, User user) {
+    User verifiedUser = us.findById(user.getId());
     LocalDateTime startOfDay = date.atStartOfDay();
     LocalDateTime endOfDay = date.atTime(LocalTime.MAX);
 
     Pageable pageable = PageRequest.of(page, size, Sort.by(orderBy));
-    Page<Order> orderList = or.findByDateTimeBetween(startOfDay, endOfDay, pageable);
+    Page<Order> orderList = or.findByDateTimeBetweenAndUserId(startOfDay, endOfDay, pageable, user.getId());
     return orderList.map(this::convertOrderResultToDTO);
   }
 
@@ -80,7 +86,8 @@ public class OrdersService {
   }
 
   @Transactional
-  public TableResultDTO createOrder(OrderDTO body) {
+  public TableResultDTO createOrder(OrderDTO body, User user) {
+    User verifiedUser = us.findById(user.getId());
     Table restaurantTable = ts.findById(body.tableId()).orElseThrow(() -> new NotFoundException(body.tableId()));
     Order order;
     List<OrderDetails> orderDetailsList = new ArrayList<>();
@@ -97,6 +104,7 @@ public class OrdersService {
               .dateTime(LocalDateTime.now())
               .note(body.note())
               .orderState(OrderState.PENDING)
+              .user(verifiedUser)
               .build();
       this.save(order);
 
@@ -150,35 +158,47 @@ public class OrdersService {
             .build();
   }
 
-  public TableResultDTO payOrder(UUID id) {
+  public TableResultDTO payOrder(UUID id, User user) {
+    User verifiedUser = us.findById(user.getId());
     Order order = or.findById(id).orElseThrow(() -> new NotFoundException(id));
-    Table restaurantTable = order.getTable();
-    order.setOrderState(OrderState.COMPLETED);
-    order.setRemainingAmountToPay(0.0);
-    for (OrderDetails odts : order.getProductList()) {
-      updateOrderDetailsSubtotal(odts);
-      odr.save(odts);
+
+
+    if (order.getUser().getId() == verifiedUser.getId()) {
+      Table restaurantTable = order.getTable();
+      order.setOrderState(OrderState.COMPLETED);
+      order.setRemainingAmountToPay(0.0);
+      for (OrderDetails odts : order.getProductList()) {
+        updateOrderDetailsSubtotal(odts);
+        odr.save(odts);
+      }
+      restaurantTable.setOrders(null);
+      restaurantTable.setTableState(TableState.FREE);
+      ts.save(restaurantTable);
+      or.save(order);
+      cms.sendUpdateMessage(ElementToUp.TABLE);
+      OrderResultDTO orderResultDTO = convertOrderResultToDTO(order);
+      return TableResultDTO
+              .builder()
+              .table_id(order.getTable().getId())
+              .tableState(order.getTable().getTableState())
+              .tableNumber(order.getTable().getTableNumber())
+              .order(orderResultDTO)
+              .build();
+    } else {
+      throw new UnauthorizedException("You have not the permissions to edit this order");
     }
-    restaurantTable.setOrders(null);
-    restaurantTable.setTableState(TableState.FREE);
-    ts.save(restaurantTable);
-    or.save(order);
-    cms.sendUpdateMessage(ElementToUp.TABLE);
-    OrderResultDTO orderResultDTO = convertOrderResultToDTO(order);
-    return TableResultDTO
-            .builder()
-            .table_id(order.getTable().getId())
-            .tableState(order.getTable().getTableState())
-            .tableNumber(order.getTable().getTableNumber())
-            .order(orderResultDTO)
-            .build();
   }
 
-  public TableResultDTO addToOrder(UUID orderId, OrderDetailsDTO product) {
+  public TableResultDTO addToOrder(UUID orderId, OrderDetailsDTO product, User user) {
+    User verifiedUser = us.findById(user.getId());
+
     Order order = or.findById(orderId).orElseThrow(() -> new NotFoundException(orderId));
 
-    OrderDetails orderDetailsFound = odr.findByProductIdAndOrderId(product.id(), orderId);
+    if (order.getUser().getId() != verifiedUser.getId()) {
+      throw new UnauthorizedException("You have not the permissions to edit this order!");
+    }
 
+    OrderDetails orderDetailsFound = odr.findByProductIdAndOrderId(product.id(), orderId);
 
     if (orderDetailsFound != null) {
       orderDetailsFound.setQuantity(orderDetailsFound.getQuantity() + product.quantity());
@@ -208,8 +228,14 @@ public class OrdersService {
             .build();
   }
 
-  public TableResultDTO payPartialOrder(UUID orderId, OrderDetailsDTO pruductToPay) {
+  public TableResultDTO payPartialOrder(UUID orderId, OrderDetailsDTO pruductToPay, User user) {
+    User verifiedUser = us.findById(user.getId());
+
     Order order = or.findById(orderId).orElseThrow(() -> new NotFoundException(orderId));
+
+    if (order.getUser().getId() != verifiedUser.getId()) {
+      throw new UnauthorizedException("You have not the permissions to edit this order!");
+    }
 
     OrderDetails orderDetailsFound = odr.findByProductIdAndOrderId(pruductToPay.id(), orderId);
     updateOrderDetailsPaiquantity(orderDetailsFound, pruductToPay.quantity());

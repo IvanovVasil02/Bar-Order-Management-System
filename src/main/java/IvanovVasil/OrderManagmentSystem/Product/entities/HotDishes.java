@@ -2,6 +2,7 @@ package IvanovVasil.OrderManagmentSystem.Product.entities;
 
 import IvanovVasil.OrderManagmentSystem.Product.enums.HotDishesCategory;
 import IvanovVasil.OrderManagmentSystem.Product.enums.ProductCategory;
+import IvanovVasil.OrderManagmentSystem.User.User;
 import IvanovVasil.OrderManagmentSystem.ingredient.Ingredient;
 import jakarta.persistence.*;
 import lombok.*;
@@ -24,8 +25,8 @@ public class HotDishes extends Product {
           inverseJoinColumns = @JoinColumn(name = "ingredient_id"))
   private List<Ingredient> ingredients;
 
-  public HotDishes(String name, Double price, HotDishesCategory subCategory, List<Ingredient> ingredients) {
-    super(name, price);
+  public HotDishes(String name, Double price, HotDishesCategory subCategory, List<Ingredient> ingredients, User user) {
+    super(name, price, user);
     this.setProductCategory(ProductCategory.HOT_DISHES);
     this.subCategory = subCategory;
     this.ingredients = ingredients;

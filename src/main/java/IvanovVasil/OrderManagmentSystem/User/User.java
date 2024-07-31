@@ -1,10 +1,7 @@
 package IvanovVasil.OrderManagmentSystem.User;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -17,12 +14,17 @@ import java.util.UUID;
 @Getter
 @Setter
 @Table(name = "users")
+@Builder
 public class User implements UserDetails {
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
+  private String name;
+  private String surname;
   private String email;
   private String password;
+  private String phone;
+  private String address;
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -53,5 +55,6 @@ public class User implements UserDetails {
   public boolean isEnabled() {
     return true;
   }
+
 
 }

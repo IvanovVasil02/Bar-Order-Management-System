@@ -2,6 +2,7 @@ package IvanovVasil.OrderManagmentSystem.Order.entities;
 
 import IvanovVasil.OrderManagmentSystem.Order.enums.OrderState;
 import IvanovVasil.OrderManagmentSystem.Table.Table;
+import IvanovVasil.OrderManagmentSystem.User.User;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -32,6 +33,9 @@ public class Order {
   private Double remainingAmountToPay;
   @Enumerated(EnumType.STRING)
   private OrderState orderState;
+  @ManyToOne
+  @JoinColumn(name = "user_id")
+  private User user;
 
   @Override
   public String toString() {

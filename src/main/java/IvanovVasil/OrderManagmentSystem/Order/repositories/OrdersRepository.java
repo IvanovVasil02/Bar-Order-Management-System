@@ -17,5 +17,6 @@ public interface OrdersRepository extends JpaRepository<Order, UUID> {
 
   Order findByOrderStateAndTableId(OrderState state, UUID tableId);
 
-  Page<Order> findByDateTimeBetween(LocalDateTime startOfDay, LocalDateTime endOfDay, Pageable pageable);
+
+  Page<Order> findByDateTimeBetweenAndUserId(LocalDateTime startOfDay, LocalDateTime endOfDay, Pageable pageable, UUID user);
 }

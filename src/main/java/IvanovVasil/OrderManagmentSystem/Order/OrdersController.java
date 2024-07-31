@@ -4,11 +4,13 @@ import IvanovVasil.OrderManagmentSystem.Order.payloads.OrderDTO;
 import IvanovVasil.OrderManagmentSystem.Order.payloads.OrderDetailsDTO;
 import IvanovVasil.OrderManagmentSystem.Order.payloads.OrderResultDTO;
 import IvanovVasil.OrderManagmentSystem.Table.TableResultDTO;
+import IvanovVasil.OrderManagmentSystem.User.User;
 import IvanovVasil.OrderManagmentSystem.exceptions.BadRequestException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,8 +28,8 @@ public class OrdersController {
   public Page<OrderResultDTO> getOrdersByDate(@RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
                                               @RequestParam(defaultValue = "0") int page,
                                               @RequestParam(defaultValue = "30") int size,
-                                              @RequestParam(defaultValue = "dateTime") String orderBy) {
-    return os.getAllOrdersByDate(date, page, size, orderBy);
+                                              @RequestParam(defaultValue = "dateTime") String orderBy, @AuthenticationPrincipal User user) {
+    return os.getAllOrdersByDate(date, page, size, orderBy, user);
   }
 
   @GetMapping("/{tableid}")
@@ -36,35 +38,35 @@ public class OrdersController {
   }
 
   @PostMapping("")
-  public TableResultDTO addOrder(@Valid @RequestBody OrderDTO body, BindingResult validation) {
+  public TableResultDTO addOrder(@Valid @RequestBody OrderDTO body, BindingResult validation, @AuthenticationPrincipal User user) {
     if (validation.hasErrors()) {
       throw new BadRequestException("There was an issue with the data you submitted", validation.getAllErrors());
     } else {
-      return os.createOrder(body);
+      return os.createOrder(body, user);
     }
   }
 
   @PutMapping("/payOrder/{orderId}")
-  public TableResultDTO payOrder(@PathVariable UUID orderId) {
-    return os.payOrder(orderId);
+  public TableResultDTO payOrder(@PathVariable UUID orderId, @AuthenticationPrincipal User user) {
+    return os.payOrder(orderId, user);
   }
 
   @PutMapping("/addToOrder/{orderId}")
-  public TableResultDTO addToOrder(@PathVariable UUID orderId, @Valid @RequestBody OrderDetailsDTO product, BindingResult validation) {
+  public TableResultDTO addToOrder(@PathVariable UUID orderId, @Valid @RequestBody OrderDetailsDTO product, BindingResult validation, @AuthenticationPrincipal User user) {
     if (validation.hasErrors()) {
       throw new BadRequestException("There was an issue with the data you submitted", validation.getAllErrors());
     } else {
-      return os.addToOrder(orderId, product);
+      return os.addToOrder(orderId, product, user);
     }
   }
 
   @PutMapping("/payPartialOrder/{orderId}")
-  public TableResultDTO payPartialOrder(@PathVariable UUID orderId, @Valid @RequestBody OrderDetailsDTO product, BindingResult validation) {
+  public TableResultDTO payPartialOrder(@PathVariable UUID orderId, @Valid @RequestBody OrderDetailsDTO product, BindingResult validation, @AuthenticationPrincipal User user) {
     if (validation.hasErrors()) {
       throw new BadRequestException("There was an issue with the data you submitted", validation.getAllErrors());
     } else {
 
-      return os.payPartialOrder(orderId, product);
+      return os.payPartialOrder(orderId, product, user);
     }
   }
 
