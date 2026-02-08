@@ -44,6 +44,7 @@ public class ExceptionsHandler {
   public ErrorsResponseDTO handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
     return new ErrorsResponseDTO(e.getMessage(), new Date());
   }
+
   
   @ExceptionHandler(HttpMessageNotReadableException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
