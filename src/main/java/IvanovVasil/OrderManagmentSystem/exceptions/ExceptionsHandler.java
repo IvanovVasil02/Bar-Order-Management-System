@@ -41,16 +41,10 @@ public class ExceptionsHandler {
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
   @ResponseStatus(HttpStatus.NOT_FOUND)
-  public ErrorsResponseDTO handleMethodArgumentNotValidException(BadRequestException e) {
+  public ErrorsResponseDTO handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
     return new ErrorsResponseDTO(e.getMessage(), new Date());
   }
-
-  @ExceptionHandler(NotContextException.class)
-  @ResponseStatus(HttpStatus.NO_CONTENT)
-  public ErrorsResponseDTO handleNotContent(NotContextException e) {
-    return new ErrorsResponseDTO(e.getMessage(), new Date());
-  }
-
+  
   @ExceptionHandler(HttpMessageNotReadableException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   public ErrorsResponseDTO handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
